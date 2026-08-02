@@ -13,14 +13,14 @@
     <linkfile src="mkimg.sh" dest="rpi4-mkimg.sh" />
     <linkfile src="wrimg.sh" dest="rpi4-wrimg.sh" />
   </project>
-  <project path="device/brcm/rpi5" name="android_device_brcm_rpi5" remote="radiosound" revision="b91ea07ee97108794d86f057989e91e858182c33" >
+  <project path="device/brcm/rpi5" name="android_device_brcm_rpi5" remote="radiosound" revision="android-16.0" >
     <linkfile src="mkimg.sh" dest="rpi5-mkimg.sh" />
     <linkfile src="wrimg.sh" dest="rpi5-wrimg.sh" />
   </project>
   <project path="device/brcm/rpi4-kernel" name="raspberry-vanilla/android_device_brcm_rpi4-kernel" remote="github" revision="android-16.0" />
   <project path="device/brcm/rpi5-kernel" name="raspberry-vanilla/android_device_brcm_rpi5-kernel" remote="github" revision="android-16.0" />
   <project path="vendor/brcm" name="raspberry-vanilla/proprietary_vendor_brcm" remote="github" revision="android-16.0" />
-  <project path="vendor/radiosound/osmand" name="android_vendor_osmand" remote="radiosound" revision="f15f4f2dba6c1a06677f006437a825ad772906bd" />
+  <project path="vendor/radiosound/osmand" name="android_vendor_osmand" remote="radiosound" revision="android-16.0" />
 
   <!-- Audio -->
   <project path="external/alsa-lib" name="raspberry-vanilla/android_external_alsa-lib" remote="github" revision="android-16.0" />
@@ -44,7 +44,7 @@
 
   <!-- Camera -->
   <remove-project name="platform/external/libcamera" />
-  <project path="external/libcamera" name="android_external_libcamera" remote="radiosound" revision="99e2a7bda5bce9a13c404990390a6aff20916d5f" />
+  <project path="external/libcamera" name="android_external_libcamera" remote="radiosound" revision="android-16.0" />
   <project path="external/libpisp" name="raspberry-vanilla/android_external_libpisp" remote="github" revision="android-16.0" />
   <project path="external/libyuv_chromium" name="raspberry-vanilla/android_external_libyuv_chromium" remote="github" revision="android-16.0" />
 
@@ -52,13 +52,13 @@
   <remove-project name="platform/external/libudev-zero" />
   <project path="external/ffmpeg" name="raspberry-vanilla/android_external_ffmpeg" remote="github" revision="android-16.0" />
   <project path="external/ffmpeg_codec2" name="raspberry-vanilla/android_external_ffmpeg_codec2" remote="github" revision="android-16.0" />
-  <project path="external/libudev-zero" name="android_external_libudev-zero" remote="radiosound" revision="1f150ed203f1082e99170fc4e1b6fe8aeb0b9b18" />
+  <project path="external/libudev-zero" name="android_external_libudev-zero" remote="radiosound" revision="android-16.0" />
 
   <!-- Graphics -->
   <remove-project name="platform/external/drm_hwcomposer" />
   <remove-project name="platform/external/minigbm" />
   <project path="external/drm_hwcomposer" name="raspberry-vanilla/android_external_drm_hwcomposer" remote="github" revision="android-16.0" />
-  <project path="external/mesa3d-rpi" name="android_external_mesa3d-rpi" remote="radiosound" revision="39dd40bfaf3f8077176dbcff9e2d51231c95603d" />
+  <project path="external/mesa3d-rpi" name="android_external_mesa3d-rpi" remote="radiosound" revision="android-16.0" />
   <project path="external/minigbm" name="raspberry-vanilla/android_external_minigbm" remote="github" revision="android-16.0" />
 
   <!-- ninja-to-soong -->
