@@ -13,7 +13,7 @@
     <linkfile src="mkimg.sh" dest="rpi4-mkimg.sh" />
     <linkfile src="wrimg.sh" dest="rpi4-wrimg.sh" />
   </project>
-  <project path="device/brcm/rpi5" name="android_device_brcm_rpi5" remote="radiosound" revision="363423bcb3d9e399ec26378a351ec1cc6bc44a9e" >
+  <project path="device/brcm/rpi5" name="android_device_brcm_rpi5" remote="radiosound" revision="b91ea07" >
     <linkfile src="mkimg.sh" dest="rpi5-mkimg.sh" />
     <linkfile src="wrimg.sh" dest="rpi5-wrimg.sh" />
   </project>
