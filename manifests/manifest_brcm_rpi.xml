@@ -8,7 +8,7 @@
     <linkfile src="mkimg.sh" dest="rpi4-mkimg.sh" />
     <linkfile src="wrimg.sh" dest="rpi4-wrimg.sh" />
   </project>
-  <project path="device/brcm/rpi5" name="android_device_brcm_rpi5" remote="radiosound" revision="ef0dc60db797ff4599abeb9263d5fe67ab5e5e17" >
+  <project path="device/brcm/rpi5" name="android_device_brcm_rpi5" remote="radiosound" revision="fb38885fbdadcb46f796d9ec7770d8c58a9f75d4" >
     <linkfile src="mkimg.sh" dest="rpi5-mkimg.sh" />
     <linkfile src="wrimg.sh" dest="rpi5-wrimg.sh" />
   </project>
