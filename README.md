@@ -6,7 +6,7 @@ compatibility fixes to the radiosound-com forks.
 
 ## One-command checkout
 
-Install Google's `repo` tool first, then run:
+Install Google's `repo` tool and Git LFS first, then run:
 
 ```sh
 git clone https://github.com/radiosound-com/caramel-vanilla-manifest.git \
@@ -30,6 +30,10 @@ m bootimage systemimage vendorimage -j$(getconf _NPROCESSORS_ONLN)
 The current Raspberry Vanilla device tree advertises the `trunk_staging`
 release configuration. The upstream README may show the older `bp4a` spelling.
 
+The build includes the Caramel Vanilla OsmAnd Automotive prebuilt. Git LFS is
+used because the APK is larger than GitHub's regular-file limit; `checkout.sh`
+hydrates it after `repo sync`.
+
 ## Caramel Vanilla deltas
 
 The device tree and standard Raspberry Vanilla manifests remain upstream. This
@@ -44,3 +48,12 @@ revisions:
 
 OsmAnd AAOS integration is maintained separately in
 `radiosound-com/OsmAnd`, branch `caramel-vanilla-osmand-aaos`.
+
+The Raspberry Pi 5 product removes `CarMapsPlaceholder`, installs OsmAnd as
+the `APP_MAPS` provider, and exposes both the templated car UI and a separate
+`OsmAnd Full UI` launcher for downloads and other parked-only tasks.
+
+The open-source Android 16 tree contains the `CarTemplatesHost.mk` capability
+declaration but not a templates renderer service. A runtime image must supply
+a compatible templates host; the Google Automotive AVD does so, while a
+GMS-free Caramel Vanilla image still needs an open-source host implementation.
