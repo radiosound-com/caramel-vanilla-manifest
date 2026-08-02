@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2026 Radio Sound, Inc. for the Caramel Vanilla manifest additions.
+  Licensed under the Apache License, Version 2.0.
+  Upstream Raspberry Vanilla projects retain their original licenses.
+-->
 <manifest>
   <remote name="github" fetch="https://github.com/" />
   <remote name="radiosound" fetch="https://github.com/radiosound-com/" />
@@ -15,7 +20,7 @@
   <project path="device/brcm/rpi4-kernel" name="raspberry-vanilla/android_device_brcm_rpi4-kernel" remote="github" revision="android-16.0" />
   <project path="device/brcm/rpi5-kernel" name="raspberry-vanilla/android_device_brcm_rpi5-kernel" remote="github" revision="android-16.0" />
   <project path="vendor/brcm" name="raspberry-vanilla/proprietary_vendor_brcm" remote="github" revision="android-16.0" />
-  <project path="vendor/radiosound/osmand" name="android_vendor_osmand" remote="radiosound" revision="56a596d" />
+  <project path="vendor/radiosound/osmand" name="android_vendor_osmand" remote="radiosound" revision="99e6056" />
 
   <!-- Audio -->
   <project path="external/alsa-lib" name="raspberry-vanilla/android_external_alsa-lib" remote="github" revision="android-16.0" />

@@ -4,6 +4,10 @@ This repository bootstraps the Caramel Vanilla Raspberry Pi 5 Android Automotive
 checkout. It follows Raspberry Vanilla Android 16 and pins the Caramel Vanilla
 compatibility fixes to the radiosound-com forks.
 
+Copyright 2026 Radio Sound, Inc. The original checkout tooling and manifest
+additions are licensed under the [Apache License 2.0](LICENSE). Raspberry
+Vanilla and other upstream projects retain their own licenses.
+
 ## One-command checkout
 
 Install Google's `repo` tool and Git LFS first, then run:
@@ -57,3 +61,17 @@ The open-source Android 16 tree contains the `CarTemplatesHost.mk` capability
 declaration but not a templates renderer service. This manifest supplies the
 open-source Caramel Vanilla renderer as a platform-signed product privileged
 app, so a GMS-free image has a complete templates-host implementation.
+
+## Published source repositories
+
+* [Manifest and checkout tooling](https://github.com/radiosound-com/caramel-vanilla-manifest)
+* [Raspberry Pi 5 device integration](https://github.com/radiosound-com/android_device_brcm_rpi5/tree/caramel-vanilla-aaos)
+* [OsmAnd product packaging](https://github.com/radiosound-com/android_vendor_osmand)
+* [Caramel Vanilla templates host](https://github.com/radiosound-com/android_packages_apps_Car_TemplatesHost)
+* [OsmAnd AAOS fork](https://github.com/radiosound-com/OsmAnd/tree/caramel-vanilla-osmand-aaos)
+
+The manifest also pins these published Radio Sound forks:
+
+* [libcamera](https://github.com/radiosound-com/android_external_libcamera)
+* [libudev-zero](https://github.com/radiosound-com/android_external_libudev-zero)
+* [Mesa for Raspberry Pi](https://github.com/radiosound-com/android_external_mesa3d-rpi)

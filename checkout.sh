@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright 2026 Radio Sound, Inc.
+# Licensed under the Apache License, Version 2.0.
+
 set -euo pipefail
 
 if ! command -v repo >/dev/null 2>&1; then
