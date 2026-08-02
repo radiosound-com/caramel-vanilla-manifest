@@ -15,7 +15,7 @@
   <project path="device/brcm/rpi4-kernel" name="raspberry-vanilla/android_device_brcm_rpi4-kernel" remote="github" revision="android-16.0" />
   <project path="device/brcm/rpi5-kernel" name="raspberry-vanilla/android_device_brcm_rpi5-kernel" remote="github" revision="android-16.0" />
   <project path="vendor/brcm" name="raspberry-vanilla/proprietary_vendor_brcm" remote="github" revision="android-16.0" />
-  <project path="vendor/radiosound/osmand" name="android_vendor_osmand" remote="radiosound" revision="fb40bb1ceade86ba5ee1d60f9df100bfa2997012" />
+  <project path="vendor/radiosound/osmand" name="android_vendor_osmand" remote="radiosound" revision="e73011c81176bac5d156d5cd6dd4a77c59e711e6" />
 
   <!-- Audio -->
   <project path="external/alsa-lib" name="raspberry-vanilla/android_external_alsa-lib" remote="github" revision="android-16.0" />
