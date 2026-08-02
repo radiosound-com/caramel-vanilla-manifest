@@ -13,14 +13,14 @@
     <linkfile src="mkimg.sh" dest="rpi4-mkimg.sh" />
     <linkfile src="wrimg.sh" dest="rpi4-wrimg.sh" />
   </project>
-  <project path="device/brcm/rpi5" name="android_device_brcm_rpi5" remote="radiosound" revision="b91ea07" >
+  <project path="device/brcm/rpi5" name="android_device_brcm_rpi5" remote="radiosound" revision="b91ea07ee97108794d86f057989e91e858182c33" >
     <linkfile src="mkimg.sh" dest="rpi5-mkimg.sh" />
     <linkfile src="wrimg.sh" dest="rpi5-wrimg.sh" />
   </project>
   <project path="device/brcm/rpi4-kernel" name="raspberry-vanilla/android_device_brcm_rpi4-kernel" remote="github" revision="android-16.0" />
   <project path="device/brcm/rpi5-kernel" name="raspberry-vanilla/android_device_brcm_rpi5-kernel" remote="github" revision="android-16.0" />
   <project path="vendor/brcm" name="raspberry-vanilla/proprietary_vendor_brcm" remote="github" revision="android-16.0" />
-  <project path="vendor/radiosound/osmand" name="android_vendor_osmand" remote="radiosound" revision="f15f4f2" />
+  <project path="vendor/radiosound/osmand" name="android_vendor_osmand" remote="radiosound" revision="f15f4f2dba6c1a06677f006437a825ad772906bd" />
 
   <!-- Audio -->
   <project path="external/alsa-lib" name="raspberry-vanilla/android_external_alsa-lib" remote="github" revision="android-16.0" />
