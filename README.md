@@ -54,6 +54,6 @@ the `APP_MAPS` provider, and exposes both the templated car UI and a separate
 `OsmAnd Full UI` launcher for downloads and other parked-only tasks.
 
 The open-source Android 16 tree contains the `CarTemplatesHost.mk` capability
-declaration but not a templates renderer service. A runtime image must supply
-a compatible templates host; the Google Automotive AVD does so, while a
-GMS-free Caramel Vanilla image still needs an open-source host implementation.
+declaration but not a templates renderer service. This manifest supplies the
+open-source Caramel Vanilla renderer as a platform-signed product privileged
+app, so a GMS-free image has a complete templates-host implementation.
