@@ -66,56 +66,20 @@ m emu_img_zip
 
 The AVD output is `out/target/product/emulator_car64_arm64`; `emu_img_zip`
 also creates the portable system-image archive. The x86_64 product can be
-selected instead with
-`lunch sdk_car_x86_64-trunk_staging-userdebug`. The compatibility script changes
-only the generic emulator's VHAL timeout property from the system partition to
-vendor; it does not affect the Raspberry Pi product.
-
-The current Raspberry Vanilla device tree advertises the `trunk_staging`
-release configuration. The upstream README may show the older `bp4a` spelling.
+selected instead with `lunch sdk_car_x86_64-trunk_staging-userdebug`.
 
 The build includes the Caramel Vanilla OsmAnd Automotive prebuilt. Git LFS is
 used because the APK is larger than GitHub's regular-file limit; `checkout.sh`
 hydrates it after `repo sync`.
 
-## Caramel Vanilla deltas
+## What it includes
 
-The device tree and standard Raspberry Vanilla manifests remain upstream where
-possible. Radio Sound's public GitHub forks use Raspberry Vanilla-compatible
-`android-16.0` branches; the manifest no longer has a second GitHub remote.
-The Raspberry Pi 5 product consumes Mark777a's Apache-2.0 AIDL v6 USB NMEA GNSS
-HAL directly from [`mark777a/AOSP-AIDL-v6-GNSS-HAL`](https://github.com/mark777a/AOSP-AIDL-v6-GNSS-HAL).
-The old KonstaKANG/Lineage GPS project is retired.
-
-The Radio Sound fork revisions are:
-
-| Project | Revision |
-| --- | --- |
-| `android_external_libudev-zero` | `android-16.0` |
-| `android_external_libcamera` | `android-16.0` |
-| `android_external_mesa3d-rpi` | `android-16.0` |
-
-OsmAnd AAOS integration is maintained separately in
-`radiosound-com/OsmAnd`, branch `caramel-vanilla-osmand-aaos`.
-
-The Raspberry Pi 5 product removes `CarMapsPlaceholder`, installs OsmAnd as
-the `APP_MAPS` provider, and exposes both the templated car UI and a separate
-`OsmAnd Full UI` launcher for downloads and other parked-only tasks.
-
-The open-source Android 16 tree contains the `CarTemplatesHost.mk` capability
-declaration but not a templates renderer service. This manifest supplies the
-open-source Caramel Vanilla renderer as a platform-signed product privileged
-app, so a GMS-free image has a complete templates-host implementation.
-
-Caramel Vanilla is the public baseline. Salted Caramel Vanilla is limited to
-Radio Sound's CAN/A2B amplifier overlay and does not duplicate the public device
-tree or general platform work. The active platform work is tracked in the
-[Caramel Vanilla GitHub issues](https://github.com/radiosound-com/caramel-vanilla-manifest/issues).
-The bounded F-Droid scanner and catalog-import bundle format are
-in [`tools/fdroid-scanner`](tools/fdroid-scanner); its design and mirror policy
-are tracked in [issue #1](https://github.com/radiosound-com/caramel-vanilla-manifest/issues/1).
-It only inspects explicitly selected APKs and leaves mirroring and release
-signing to controlled services.
+Caramel Vanilla is a GMS-free Android Automotive OS build for Raspberry Pi 5,
+based on Raspberry Vanilla Android 16. The product includes Raspberry Pi device
+integration, an AndroidX car templates host, OsmAnd Automotive maps with a
+separate full UI for parked tasks, Aurora Store packaging, Car Settings
+integration, and the bounded F-Droid catalog scanner in
+[`tools/fdroid-scanner`](tools/fdroid-scanner).
 
 ## Published source repositories
 
