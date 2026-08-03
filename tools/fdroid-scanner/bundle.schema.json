@@ -14,7 +14,11 @@
       "properties": {
         "name": {"const": "F-Droid"},
         "index_url": {"type": "string", "format": "uri", "pattern": "^https://"},
-        "index": {"type": "object"}
+        "index": {"type": "object"},
+        "advertised_mirrors": {
+          "type": "array",
+          "items": {"type": "string", "format": "uri", "pattern": "^https://"}
+        }
       }
     },
     "policy": {
@@ -24,6 +28,10 @@
         "daily_byte_budget": {"type": "integer", "minimum": 1},
         "bytes_used": {"type": "integer", "minimum": 0},
         "max_apk_bytes": {"type": "integer", "minimum": 1},
+        "host_interval_seconds": {"type": "number", "minimum": 0},
+        "mirrors_enabled": {"type": "boolean"},
+        "retry_count": {"type": "integer", "minimum": 0},
+        "retry_backoff_seconds": {"type": "number", "minimum": 0},
         "selected_packages": {"type": "array", "items": {"type": "string", "pattern": "^[A-Za-z0-9_.]+$"}}
       }
     },
@@ -37,6 +45,8 @@
           "status": {"enum": ["inspected", "not_in_index"]},
           "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
           "apk_url": {"type": "string", "format": "uri", "pattern": "^https://"},
+          "canonical_apk_url": {"type": "string", "format": "uri", "pattern": "^https://"},
+          "mirror_used": {"type": "string", "format": "uri", "pattern": "^https://"},
           "manifest_findings": {"type": "object"}
         }
       }

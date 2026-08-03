@@ -4,8 +4,8 @@
 The scanner deliberately does not mirror an app store.  It fetches the F-Droid
 index conditionally, downloads only explicitly selected package IDs, inspects
 those APKs with a supplied Android ``aapt2``, and emits a signed-import-ready
-JSON bundle.  It is intended to run on littleboy outside the Kubernetes
-cluster.
+JSON bundle.  It is intended to run on a dedicated external scanner host
+outside the Kubernetes cluster.
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ import fcntl
 import hashlib
 import json
 import os
+import random
 import re
 import shutil
 import subprocess
@@ -35,6 +36,9 @@ SCHEMA = "https://caramel-vanilla.radiosound.com/schemas/catalog-import-v1.json"
 DEFAULT_INDEX_URL = "https://f-droid.org/repo/index-v2.json"
 DEFAULT_MAX_INDEX_BYTES = 128 * 1024 * 1024
 DEFAULT_MAX_APK_BYTES = 512 * 1024 * 1024
+DEFAULT_RETRY_COUNT = 3
+DEFAULT_RETRY_BACKOFF = 1.0
+RETRYABLE_HTTP_CODES = frozenset({408, 425, 429, 500, 502, 503, 504})
 
 
 class ScanError(RuntimeError):
@@ -117,7 +121,7 @@ class DailyBudget:
 
 class HostRateLimiter:
     def __init__(self, minimum_interval: float) -> None:
-        self.minimum_interval = minimum_interval
+        self.minimum_interval = max(0.0, minimum_interval)
         self.last_request: dict[str, float] = {}
 
     def wait(self, host: str) -> None:
@@ -134,39 +138,82 @@ def request_bytes(
     budget: DailyBudget,
     limiter: HostRateLimiter,
     max_bytes: int,
+    retries: int = DEFAULT_RETRY_COUNT,
+    retry_backoff: float = DEFAULT_RETRY_BACKOFF,
 ) -> tuple[int, dict[str, str], bytes]:
     parsed = urlparse(url)
-    if parsed.scheme != "https":
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+    ):
         raise ScanError(f"refusing non-HTTPS URL: {url}")
-    limiter.wait(parsed.netloc)
-    request = Request(url, headers=headers)
-    try:
-        response = opener.open(request, timeout=60)
-    except HTTPError as error:
-        if error.code == 304:
-            return 304, dict(error.headers.items()), b""
-        raise ScanError(f"HTTP {error.code} fetching {url}") from error
-    except URLError as error:
-        raise ScanError(f"fetching {url}: {error.reason}") from error
+    if retries < 0 or retry_backoff < 0:
+        raise ScanError("retry count and backoff must not be negative")
 
-    content_length = response.headers.get("Content-Length")
-    if content_length and int(content_length) > max_bytes:
-        raise ScanError(f"refusing {url}: {content_length} bytes exceeds limit")
-    chunks: list[bytes] = []
-    received = 0
+    host = parsed.hostname.lower()
+    request = Request(url, headers=headers)
+    for attempt in range(retries + 1):
+        limiter.wait(host)
+        response = None
+        retry_reason: str | None = None
+        retry_after = 0.0
+        try:
+            response = opener.open(request, timeout=60)
+            content_length = response.headers.get("Content-Length")
+            if content_length:
+                try:
+                    declared_size = int(content_length)
+                except ValueError as error:
+                    raise ScanError(
+                        f"refusing {url}: invalid Content-Length {content_length!r}"
+                    ) from error
+                if declared_size > max_bytes:
+                    raise ScanError(
+                        f"refusing {url}: {content_length} bytes exceeds limit"
+                    )
+            chunks: list[bytes] = []
+            received = 0
+            while True:
+                chunk = response.read(64 * 1024)
+                if not chunk:
+                    break
+                received += len(chunk)
+                if received > max_bytes:
+                    raise ScanError(f"refusing {url}: response exceeds limit")
+                budget.consume(len(chunk))
+                chunks.append(chunk)
+            return response.status, dict(response.headers.items()), b"".join(chunks)
+        except HTTPError as error:
+            if error.code == 304:
+                return 304, dict(error.headers.items()), b""
+            if error.code in RETRYABLE_HTTP_CODES:
+                retry_reason = f"HTTP {error.code} fetching {url}"
+                retry_after = _retry_after_seconds(error.headers)
+            else:
+                raise ScanError(f"HTTP {error.code} fetching {url}") from error
+        except (OSError, TimeoutError, URLError) as error:
+            retry_reason = f"fetching {url}: {getattr(error, 'reason', error)}"
+        finally:
+            if response is not None:
+                response.close()
+
+        if attempt >= retries:
+            raise ScanError(retry_reason or f"fetching {url} failed")
+        delay = max(retry_backoff * (2**attempt), retry_after)
+        if delay:
+            time.sleep(delay)
+
+    raise AssertionError("request retry loop did not return or raise")
+
+
+def _retry_after_seconds(headers: Any) -> float:
+    value = headers.get("Retry-After") if headers else None
     try:
-        while True:
-            chunk = response.read(64 * 1024)
-            if not chunk:
-                break
-            received += len(chunk)
-            if received > max_bytes:
-                raise ScanError(f"refusing {url}: response exceeds limit")
-            budget.consume(len(chunk))
-            chunks.append(chunk)
-    finally:
-        response.close()
-    return response.status, dict(response.headers.items()), b"".join(chunks)
+        return max(0.0, float(value)) if value is not None else 0.0
+    except (TypeError, ValueError):
+        return 0.0
 
 
 def fetch_index(
@@ -175,6 +222,9 @@ def fetch_index(
     budget: DailyBudget,
     limiter: HostRateLimiter,
     max_bytes: int,
+    retries: int = DEFAULT_RETRY_COUNT,
+    retry_backoff: float = DEFAULT_RETRY_BACKOFF,
+    opener: Any | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     cache_dir.mkdir(parents=True, exist_ok=True)
     state_path = cache_dir / "index-state.json"
@@ -187,7 +237,14 @@ def fetch_index(
 
     index_path = cache_dir / "index-v2.json"
     status, response_headers, body = request_bytes(
-        build_opener(), index_url, headers, budget, limiter, max_bytes
+        opener or build_opener(),
+        index_url,
+        headers,
+        budget,
+        limiter,
+        max_bytes,
+        retries,
+        retry_backoff,
     )
     if status == 304:
         if not index_path.exists():
@@ -252,6 +309,28 @@ def metadata_urls(record: dict[str, Any]) -> dict[str, str]:
     return result
 
 
+def repository_base_url(index_url: str) -> str:
+    parsed = urlparse(index_url)
+    path = parsed.path if parsed.path.endswith("/") else parsed.path.rsplit("/", 1)[0] + "/"
+    return parsed._replace(path=path, params="", query="", fragment="").geturl()
+
+
+def _join_repository_file(repository_url: str, filename: str) -> str:
+    parsed = urlparse(filename)
+    if parsed.scheme or parsed.netloc:
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+        ):
+            raise ScanError(f"refusing non-HTTPS APK URL: {filename}")
+        return filename
+    if filename.startswith("//"):
+        raise ScanError(f"refusing network-path APK URL: {filename}")
+    return urljoin(repository_url.rstrip("/") + "/", filename.lstrip("/"))
+
+
 def apk_url(index_url: str, version: dict[str, Any]) -> tuple[str, int | None, str | None]:
     file_info = version.get("file", {})
     if not isinstance(file_info, dict):
@@ -259,10 +338,126 @@ def apk_url(index_url: str, version: dict[str, Any]) -> tuple[str, int | None, s
     name = file_info.get("name") or file_info.get("url")
     if not isinstance(name, str) or not name:
         raise ScanError("indexed version has no APK filename")
-    url = name if name.startswith("https://") else urljoin(index_url, name)
+    url = _join_repository_file(repository_base_url(index_url), name)
     size = file_info.get("size")
     expected_hash = file_info.get("sha256")
-    return url, int(size) if size is not None else None, expected_hash
+    try:
+        indexed_size = int(size) if size is not None else None
+    except (TypeError, ValueError) as error:
+        raise ScanError(f"indexed APK has invalid size: {size!r}") from error
+    return url, indexed_size, expected_hash
+
+
+def advertised_mirror_urls(index: dict[str, Any]) -> list[str]:
+    repo = index.get("repo", {})
+    mirrors = repo.get("mirrors") if isinstance(repo, dict) else None
+    if isinstance(mirrors, (str, dict)):
+        mirrors = [mirrors]
+    if not isinstance(mirrors, list):
+        return []
+
+    result: list[str] = []
+    seen: set[str] = set()
+    for mirror in mirrors:
+        if isinstance(mirror, str):
+            url = mirror
+        elif isinstance(mirror, dict):
+            url = mirror.get("url")
+        else:
+            continue
+        if not isinstance(url, str) or not url:
+            continue
+        parsed = urlparse(url)
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+        ):
+            continue
+        normalized = url.rstrip("/")
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        result.append(normalized)
+    return result
+
+
+def apk_candidates(
+    index: dict[str, Any],
+    index_url: str,
+    version: dict[str, Any],
+    use_mirrors: bool,
+) -> tuple[str, list[str]]:
+    canonical_url, _, _ = apk_url(index_url, version)
+    if not use_mirrors:
+        return canonical_url, [canonical_url]
+
+    file_info = version.get("file", {})
+    name = file_info.get("name") or file_info.get("url")
+    if not isinstance(name, str) or not name:
+        raise ScanError("indexed version has no APK filename")
+    canonical_base = repository_base_url(index_url).rstrip("/")
+    mirror_candidates: list[str] = []
+    seen = {canonical_url}
+    for mirror_base in advertised_mirror_urls(index):
+        if mirror_base.rstrip("/") == canonical_base:
+            continue
+        try:
+            candidate = _join_repository_file(mirror_base, name)
+        except ScanError:
+            continue
+        if candidate not in seen:
+            seen.add(candidate)
+            mirror_candidates.append(candidate)
+    random.SystemRandom().shuffle(mirror_candidates)
+    mirror_candidates.append(canonical_url)
+    return canonical_url, mirror_candidates
+
+
+def download_apk(
+    index: dict[str, Any],
+    index_url: str,
+    version: dict[str, Any],
+    budget: DailyBudget,
+    limiter: HostRateLimiter,
+    max_bytes: int,
+    use_mirrors: bool = False,
+    retries: int = DEFAULT_RETRY_COUNT,
+    retry_backoff: float = DEFAULT_RETRY_BACKOFF,
+    opener: Any | None = None,
+) -> tuple[str, dict[str, str], bytes, int | None, str | None]:
+    canonical_url, candidates = apk_candidates(index, index_url, version, use_mirrors)
+    _, indexed_size, expected_hash = apk_url(index_url, version)
+    opener = opener or build_opener()
+    errors: list[str] = []
+    headers = {"User-Agent": "CaramelVanillaCatalogScanner/1.0"}
+    for candidate in candidates:
+        try:
+            status, response_headers, body = request_bytes(
+                opener,
+                candidate,
+                headers,
+                budget,
+                limiter,
+                max_bytes,
+                retries,
+                retry_backoff,
+            )
+            if status != 200:
+                raise ScanError(f"unexpected HTTP status {status} downloading APK")
+            actual_hash = hashlib.sha256(body).hexdigest()
+            if expected_hash and actual_hash != expected_hash:
+                raise ScanError(
+                    f"SHA-256 mismatch (expected {expected_hash}, got {actual_hash})"
+                )
+            return candidate, response_headers, body, indexed_size, expected_hash
+        except BudgetExceeded:
+            raise
+        except ScanError as error:
+            errors.append(f"{candidate}: {error}")
+    detail = "; ".join(errors)
+    raise ScanError(f"all APK URLs failed for {canonical_url}: {detail}")
 
 
 def run_aapt2(aapt2: str, apk: Path) -> tuple[str, int, str, dict[str, Any]]:
@@ -318,8 +513,16 @@ def scan(args: argparse.Namespace) -> dict[str, Any]:
     work_dir.mkdir(parents=True, exist_ok=True)
     budget = DailyBudget(cache_dir / "budget.json", args.daily_byte_budget)
     limiter = HostRateLimiter(args.host_interval)
+    opener = build_opener()
     index, index_state = fetch_index(
-        args.index_url, cache_dir, budget, limiter, args.max_index_bytes
+        args.index_url,
+        cache_dir,
+        budget,
+        limiter,
+        args.max_index_bytes,
+        args.retry_count,
+        args.retry_backoff,
+        opener,
     )
     records = package_records(index)
     selected = read_selection(args)
@@ -333,14 +536,20 @@ def scan(args: argparse.Namespace) -> dict[str, Any]:
             packages.append({"package_name": package_name, "status": "not_in_index"})
             continue
         version = latest_version(record)
-        url, indexed_size, expected_hash = apk_url(args.index_url, version)
+        canonical_url, indexed_size, expected_hash = apk_url(args.index_url, version)
         temporary_apk = work_dir / f"{package_name.replace('/', '_')}.apk"
-        headers = {"User-Agent": "CaramelVanillaCatalogScanner/1.0"}
-        status, response_headers, body = request_bytes(
-            build_opener(), url, headers, budget, limiter, args.max_apk_bytes
+        url, response_headers, body, indexed_size, expected_hash = download_apk(
+            index,
+            args.index_url,
+            version,
+            budget,
+            limiter,
+            args.max_apk_bytes,
+            args.use_mirrors,
+            args.retry_count,
+            args.retry_backoff,
+            opener,
         )
-        if status != 200:
-            raise ScanError(f"unexpected HTTP status {status} downloading {package_name}")
         temporary_apk.write_bytes(body)
         actual_hash = sha256_file(temporary_apk)
         aapt_status, aapt_exit, aapt_output, findings = run_aapt2(args.aapt2, temporary_apk)
@@ -354,15 +563,20 @@ def scan(args: argparse.Namespace) -> dict[str, Any]:
             "expected_sha256": expected_hash,
             "hash_matches_index": expected_hash in (None, actual_hash),
             "apk_url": url,
+            "canonical_apk_url": canonical_url,
             "provenance": {
                 "index_url": args.index_url,
                 "index_sha256": index_state.get("sha256"),
                 "response_etag": response_headers.get("ETag"),
+                "download_url": url,
             },
             "upstream_urls": metadata_urls(record),
             "manifest_findings": findings,
             "aapt2": {"status": aapt_status, "exit_code": aapt_exit},
         }
+        if url != canonical_url:
+            package_result["mirror_used"] = url
+            package_result["provenance"]["mirror_used"] = url
         if aapt_status != "ok":
             package_result["aapt2"]["error"] = aapt_output
         packages.append(package_result)
@@ -374,17 +588,25 @@ def scan(args: argparse.Namespace) -> dict[str, Any]:
         "bundle_version": 1,
         "generated_at": utc_now(),
         "scanner": {"name": "caramel-vanilla-fdroid-scanner", "version": "1.0"},
-        "source": {"name": "F-Droid", "index_url": args.index_url, "index": index_state},
+        "source": {
+            "name": "F-Droid",
+            "index_url": args.index_url,
+            "index": index_state,
+            "advertised_mirrors": advertised_mirror_urls(index),
+        },
         "policy": {
             "daily_byte_budget": args.daily_byte_budget,
             "bytes_used": budget.used,
             "max_apk_bytes": args.max_apk_bytes,
             "host_interval_seconds": args.host_interval,
+            "mirrors_enabled": args.use_mirrors,
+            "retry_count": args.retry_count,
+            "retry_backoff_seconds": args.retry_backoff,
             "selected_packages": selected,
         },
         "packages": packages,
         "import": {
-            "apk_mirroring": "disabled",
+            "apk_mirroring": "inspection_only" if args.use_mirrors else "disabled",
             "release_signing": "separate_controlled_step",
         },
     }
@@ -437,6 +659,25 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-index-bytes", type=int, default=DEFAULT_MAX_INDEX_BYTES)
     parser.add_argument("--max-apk-bytes", type=int, default=DEFAULT_MAX_APK_BYTES)
     parser.add_argument("--host-interval", type=float, default=2.0)
+    parser.add_argument(
+        "--retry-count",
+        "--retries",
+        dest="retry_count",
+        type=int,
+        default=DEFAULT_RETRY_COUNT,
+        help="additional attempts after a transient fetch failure",
+    )
+    parser.add_argument(
+        "--retry-backoff",
+        type=float,
+        default=DEFAULT_RETRY_BACKOFF,
+        help="initial exponential retry delay in seconds",
+    )
+    parser.add_argument(
+        "--use-mirrors",
+        action="store_true",
+        help="opt in to HTTPS mirrors advertised by index-v2 for APK downloads",
+    )
     parser.add_argument("--keep-apks", action="store_true")
     parser.add_argument("--bundle", default="catalog-import.json")
     parser.add_argument("--signing-key")

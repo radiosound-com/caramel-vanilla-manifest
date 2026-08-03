@@ -12,6 +12,10 @@ intentionally bounded and does not become an APK mirror:
 * The result records package metadata, manifest findings, SHA-256, index
   provenance, and upstream URLs. It can be signed with an offline-controlled
   OpenSSL signing key.
+* Mirroring is disabled by default. To opt in for APK inspection, add
+  `--use-mirrors`; the scanner accepts only HTTPS mirrors advertised in
+  `repo.mirrors`, retries transient failures with exponential backoff, and
+  falls back to the canonical HTTPS APK URL.
 * Upload is restricted to HTTPS and uses a scoped bearer token. The endpoint
   should validate the signature and schema before atomically importing the
   bundle; it must not be a Kubernetes API or database credential.
@@ -35,6 +39,22 @@ python3 "$CARAMEL_MANIFEST/tools/fdroid-scanner/scan.py" \
 The selection file is one package ID per line. Comments beginning with `#`
 are ignored. Keep it curated; automotive compatibility is a manifest finding,
 not a claim that every F-Droid app is safe to run while driving.
+
+Mirror-enabled inspection is still bounded to the explicitly selected package
+IDs. For example:
+
+```sh
+python3 scan.py ... \
+  --use-mirrors \
+  --retry-count 3 \
+  --retry-backoff 1
+```
+
+The scanner ignores non-HTTPS mirror entries, including onion URLs, and keeps
+the canonical HTTPS URL as the last fallback. The bundle records the
+advertised HTTPS mirrors, canonical APK URL, selected download URL, and mirror
+used when one succeeds. See [issue #1](https://github.com/radiosound-com/caramel-vanilla-manifest/issues/1)
+for the scope and acceptance criteria.
 
 The optional upload form is:
 

@@ -1,11 +1,128 @@
 import tempfile
 import unittest
+from hashlib import sha256
 from pathlib import Path
+from unittest.mock import patch
+from urllib.error import URLError
 
-from scan import latest_version, metadata_urls, run_aapt2, write_json_atomic
+from scan import (
+    DailyBudget,
+    HostRateLimiter,
+    advertised_mirror_urls,
+    apk_candidates,
+    apk_url,
+    download_apk,
+    latest_version,
+    metadata_urls,
+    run_aapt2,
+    write_json_atomic,
+)
+
+
+class FakeResponse:
+    def __init__(self, body=b"apk", status=200, headers=None):
+        self.body = body
+        self.status = status
+        self.headers = headers or {}
+        self.closed = False
+
+    def read(self, _size):
+        body, self.body = self.body, b""
+        return body
+
+    def close(self):
+        self.closed = True
+
+
+class FakeOpener:
+    def __init__(self, *responses):
+        self.responses = list(responses)
+        self.urls = []
+
+    def open(self, request, timeout):
+        self.urls.append(request.full_url)
+        response = self.responses.pop(0)
+        if isinstance(response, BaseException):
+            raise response
+        return response
 
 
 class ScannerTests(unittest.TestCase):
+    def test_index_v2_mirrors_accept_strings_and_objects_but_only_https(self):
+        index = {
+            "repo": {
+                "mirrors": [
+                    "https://mirror.example/repo",
+                    {"url": "https://mirror.example/repo/", "countryCode": "US"},
+                    {"url": "http://insecure.example/repo"},
+                    {"url": "not-a-url"},
+                ]
+            }
+        }
+        self.assertEqual(
+            advertised_mirror_urls(index), ["https://mirror.example/repo"]
+        )
+
+    def test_apk_url_joins_index_v2_root_relative_filename_to_repo(self):
+        version = {"file": {"name": "/org.example_1.apk"}}
+        self.assertEqual(
+            apk_url("https://f-droid.org/repo/index-v2.json", version)[0],
+            "https://f-droid.org/repo/org.example_1.apk",
+        )
+
+    def test_mirrors_are_not_used_without_explicit_opt_in(self):
+        index = {"repo": {"mirrors": ["https://mirror.example/repo"]}}
+        version = {"file": {"name": "/org.example_1.apk"}}
+        canonical, candidates = apk_candidates(
+            index, "https://f-droid.org/repo/index-v2.json", version, False
+        )
+        self.assertEqual(candidates, [canonical])
+
+    def test_retry_backoff_and_checksum_fallback(self):
+        good = b"correct APK bytes"
+        index = {"repo": {"mirrors": ["https://mirror.example/repo"]}}
+        version = {
+            "file": {"name": "/org.example_1.apk", "sha256": sha256(good).hexdigest()}
+        }
+        opener = FakeOpener(
+            FakeResponse(body=b"wrong APK bytes"),
+            URLError("temporary outage"),
+            FakeResponse(body=good),
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            budget = DailyBudget(Path(directory) / "budget.json", 1024)
+            limiter = HostRateLimiter(0)
+            with patch("scan.time.sleep") as sleep:
+                url, _, body, _, _ = download_apk(
+                    index,
+                    "https://f-droid.org/repo/index-v2.json",
+                    version,
+                    budget,
+                    limiter,
+                    1024,
+                    use_mirrors=True,
+                    retries=1,
+                    retry_backoff=2,
+                    opener=opener,
+                )
+        self.assertEqual(url, "https://f-droid.org/repo/org.example_1.apk")
+        self.assertEqual(body, good)
+        self.assertEqual(opener.urls, [
+            "https://mirror.example/repo/org.example_1.apk",
+            "https://f-droid.org/repo/org.example_1.apk",
+            "https://f-droid.org/repo/org.example_1.apk",
+        ])
+        sleep.assert_called_once_with(2)
+
+    def test_host_rate_limiter_is_per_host(self):
+        limiter = HostRateLimiter(1)
+        with patch("scan.time.monotonic", side_effect=[10, 10, 10.5, 10.5, 10.6, 10.6]):
+            with patch("scan.time.sleep") as sleep:
+                limiter.wait("mirror.example")
+                limiter.wait("mirror.example")
+                limiter.wait("other.example")
+        sleep.assert_called_once_with(0.5)
+
     def test_latest_version_uses_manifest_version_code(self):
         record = {
             "versions": {
