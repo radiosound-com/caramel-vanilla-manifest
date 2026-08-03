@@ -8,6 +8,28 @@ Copyright 2026 Radio Sound, Inc. The original checkout tooling and manifest
 additions are licensed under the [Apache License 2.0](LICENSE). Raspberry
 Vanilla and other upstream projects retain their own licenses.
 
+## Build requirements
+
+Read the official AOSP [setup requirements](https://source.android.com/docs/setup/start/requirements),
+[source download guide](https://source.android.com/docs/setup/download), and
+[build guide](https://source.android.com/docs/setup/build/building) first. AOSP
+currently calls for a 64-bit x86 Linux workstation, at least 64 GiB of RAM,
+and at least 400 GiB of free disk space; use more for parallel builds, ccache,
+multiple branches, or more than one checkout. macOS is not an officially
+supported AOSP build host. Install Git, Repo, Git LFS, Python 3, OpenJDK, Make,
+and the Ubuntu packages listed by AOSP. Expect a large initial download of
+source, prebuilts, device projects, and LFS objects: use a fast, stable,
+preferably unmetered connection and allow hours for the first sync.
+
+On Ubuntu, the core package installation is:
+
+```sh
+sudo apt-get update && sudo apt-get install \
+  git-core gnupg flex bison build-essential zip curl zlib1g-dev \
+  libc6-dev-i386 x11proto-core-dev libx11-dev lib32z1-dev \
+  libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig repo git-lfs python3
+```
+
 ## One-command checkout
 
 Install Google's `repo` tool and Git LFS first, then run:
@@ -21,31 +43,30 @@ git clone https://github.com/radiosound-com/caramel-vanilla-manifest.git \
 The checkout is created at `../caramel-vanilla-android-16` by default. Pass a
 different destination as the first argument to `checkout.sh`.
 
-## Build
+## Build the Raspberry Pi 5 image
 
 ```sh
 cd ../caramel-vanilla-android-16
 source build/envsetup.sh
 lunch aosp_rpi5_car-trunk_staging-userdebug
-m bootimage systemimage vendorimage -j$(getconf _NPROCESSORS_ONLN)
+m bootimage systemimage vendorimage
 ./rpi5-mkimg.sh
 ```
 
-To build the Android 16 generic automotive AVD on littleboy, prepare the
-upstream generic-car artifact-path compatibility and select the arm64 car
-product (the native choice for Apple Silicon AVD testing):
+To build the Android 16 generic automotive AVD, prepare the upstream generic-car
+artifact-path compatibility and select the arm64 car product:
 
 ```sh
 cd ../caramel-vanilla-android-16
 ../caramel-vanilla-manifest/tools/android16/prepare-generic-car-avd.sh .
 source build/envsetup.sh
 lunch sdk_car_arm64-trunk_staging-userdebug
-m -j8 emu_img_zip
+m emu_img_zip
 ```
 
 The AVD output is `out/target/product/emulator_car64_arm64`; `emu_img_zip`
-also creates the portable system-image archive. On a host with more memory,
-the x86_64 product can be selected instead with
+also creates the portable system-image archive. The x86_64 product can be
+selected instead with
 `lunch sdk_car_x86_64-trunk_staging-userdebug`. The compatibility script changes
 only the generic emulator's VHAL timeout property from the system partition to
 vendor; it does not affect the Raspberry Pi product.
@@ -90,7 +111,7 @@ Caramel Vanilla is the public baseline. Salted Caramel Vanilla is limited to
 Radio Sound's CAN/A2B amplifier overlay and does not duplicate the public device
 tree or general platform work. The active platform work is tracked in the
 [Caramel Vanilla GitHub issues](https://github.com/radiosound-com/caramel-vanilla-manifest/issues).
-The bounded littleboy-side F-Droid scanner and catalog-import bundle format are
+The bounded F-Droid scanner and catalog-import bundle format are
 in [`tools/fdroid-scanner`](tools/fdroid-scanner); its design and mirror policy
 are tracked in [issue #1](https://github.com/radiosound-com/caramel-vanilla-manifest/issues/1).
 It only inspects explicitly selected APKs and leaves mirroring and release

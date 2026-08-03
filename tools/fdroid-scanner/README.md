@@ -1,6 +1,6 @@
 # Caramel Vanilla F-Droid scanner
 
-This is the littleboy-side companion for the Caramel Vanilla catalog. It is
+This is the build-independent companion for the Caramel Vanilla catalog. It is
 intentionally bounded and does not become an APK mirror:
 
 * F-Droid's `index-v2.json` is fetched with `ETag`/`If-Modified-Since`.
@@ -17,15 +17,18 @@ intentionally bounded and does not become an APK mirror:
   bundle; it must not be a Kubernetes API or database credential.
 
 The scanner uses the Android build-tree `aapt2` binary, so it can run against
-the existing Android checkout on littleboy:
+any completed Android checkout. Set paths appropriate to your workstation:
 
 ```sh
-cd ~/android/16
-python3 ~/caramel-vanilla-manifest/tools/fdroid-scanner/scan.py \
-  --cache-dir ~/var/caramel-vanilla-fdroid \
+export ANDROID_TOP=/path/to/caramel-vanilla-android-16
+export CARAMEL_MANIFEST=/path/to/caramel-vanilla-manifest
+export FDROID_CACHE=/path/to/caramel-vanilla-fdroid
+cd "$ANDROID_TOP"
+python3 "$CARAMEL_MANIFEST/tools/fdroid-scanner/scan.py" \
+  --cache-dir "$FDROID_CACHE" \
   --aapt2 "$PWD/out/host/linux-x86/bin/aapt2" \
-  --selection-file ~/var/caramel-vanilla-fdroid/selected.txt \
-  --bundle ~/var/caramel-vanilla-fdroid/catalog-import.json \
+  --selection-file "$FDROID_CACHE/selected.txt" \
+  --bundle "$FDROID_CACHE/catalog-import.json" \
   --signing-key /secure/path/catalog-import-signing-key.pem
 ```
 
@@ -51,4 +54,3 @@ Run the offline tests with:
 ```sh
 python3 -m unittest discover -s tests
 ```
-
