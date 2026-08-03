@@ -40,15 +40,20 @@ hydrates it after `repo sync`.
 
 ## Caramel Vanilla deltas
 
-The device tree and standard Raspberry Vanilla manifests remain upstream. This
-manifest adds the public Lineage-RPi GPS project and uses these pinned fork
-revisions:
+The device tree and standard Raspberry Vanilla manifests remain upstream where
+possible. Radio Sound's public GitHub forks use Raspberry Vanilla-compatible
+`android-16.0` branches; the manifest no longer has a second GitHub remote.
+The Raspberry Pi 5 product consumes Mark777a's Apache-2.0 AIDL v6 USB NMEA GNSS
+HAL directly from [`mark777a/AOSP-AIDL-v6-GNSS-HAL`](https://github.com/mark777a/AOSP-AIDL-v6-GNSS-HAL).
+The old KonstaKANG/Lineage GPS project is retired.
+
+The Radio Sound fork revisions are:
 
 | Project | Revision |
 | --- | --- |
-| `android_external_libudev-zero` | `1f150ed203f1082e99170fc4e1b6fe8aeb0b9b18` |
-| `android_external_libcamera` | `99e2a7bda5bce9a13c404990390a6aff20916d5f` |
-| `android_external_mesa3d-rpi` | `39dd40bfaf3f8077176dbcff9e2d51231c95603d` |
+| `android_external_libudev-zero` | `android-16.0` |
+| `android_external_libcamera` | `android-16.0` |
+| `android_external_mesa3d-rpi` | `android-16.0` |
 
 OsmAnd AAOS integration is maintained separately in
 `radiosound-com/OsmAnd`, branch `caramel-vanilla-osmand-aaos`.
@@ -62,6 +67,11 @@ declaration but not a templates renderer service. This manifest supplies the
 open-source Caramel Vanilla renderer as a platform-signed product privileged
 app, so a GMS-free image has a complete templates-host implementation.
 
+Caramel Vanilla is the public baseline. Salted Caramel Vanilla is limited to
+Radio Sound's CAN/A2B amplifier overlay and does not duplicate the public device
+tree or general platform work. The store, package-install, microG, and OTA plan
+is in [`docs/caramel-vanilla-platform.md`](docs/caramel-vanilla-platform.md).
+
 ## Published source repositories
 
 * [Manifest and checkout tooling](https://github.com/radiosound-com/caramel-vanilla-manifest)
@@ -69,6 +79,7 @@ app, so a GMS-free image has a complete templates-host implementation.
 * [OsmAnd product packaging](https://github.com/radiosound-com/android_vendor_osmand)
 * [Caramel Vanilla templates host](https://github.com/radiosound-com/android_packages_apps_Car_TemplatesHost)
 * [OsmAnd AAOS fork](https://github.com/radiosound-com/OsmAnd/tree/caramel-vanilla-osmand-aaos)
+* [Mark777a AIDL v6 GNSS HAL](https://github.com/mark777a/AOSP-AIDL-v6-GNSS-HAL)
 
 The manifest also pins these published Radio Sound forks:
 
