@@ -69,6 +69,20 @@ The importer should verify the detached signature from the
 duplicate index revisions, and commit the catalog transaction atomically.
 Public catalog reads should use a separate endpoint and credential.
 
+For local or staging validation, the repository includes a dependency-free
+reference importer. It replaces the SQLite catalog in one transaction and
+writes an automotive-filtered read index with an atomic rename:
+
+```sh
+python3 ../catalog-importer/import_catalog.py \
+  --bundle "$FDROID_CACHE/catalog-import.json" \
+  --database "$FDROID_CACHE/catalog.sqlite3" \
+  --index "$FDROID_CACHE/catalog-index.json"
+```
+
+The reference importer is not the production OKD API; it defines the safe
+bundle-to-catalog behavior that the staging service must preserve.
+
 Run the offline tests with:
 
 ```sh
