@@ -31,6 +31,22 @@ m bootimage systemimage vendorimage -j$(getconf _NPROCESSORS_ONLN)
 ./rpi5-mkimg.sh
 ```
 
+To build the Android 16 generic automotive AVD on littleboy, prepare the
+upstream generic-car artifact-path compatibility and select the x86_64 car
+product:
+
+```sh
+cd ../caramel-vanilla-android-16
+../caramel-vanilla-manifest/tools/android16/prepare-generic-car-avd.sh .
+source build/envsetup.sh
+lunch sdk_car_x86_64-trunk_staging-userdebug
+m -j32
+```
+
+The AVD output is `out/target/product/emulator_car64_x86_64`. The compatibility
+script changes only the generic emulator's VHAL timeout property from the
+system partition to vendor; it does not affect the Raspberry Pi product.
+
 The current Raspberry Vanilla device tree advertises the `trunk_staging`
 release configuration. The upstream README may show the older `bp4a` spelling.
 
