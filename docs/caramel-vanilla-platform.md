@@ -103,6 +103,11 @@ Use the official Aurora OSS release/source locations only:
 - source: <https://gitlab.com/AuroraOSS/AuroraStore>
 - releases: <https://gitlab.com/AuroraOSS/AuroraStore/-/releases>
 
+The product packaging is maintained separately in
+[`android_vendor_aurora_store`](https://github.com/radiosound-com/android_vendor_aurora_store);
+the templates renderer packaging is likewise isolated in
+[`android_vendor_car_templates_host`](https://github.com/radiosound-com/android_vendor_car_templates_host).
+
 The first product version should treat Aurora as an optional parked-mode app,
 not as a privileged silent installer. It needs the same in-car install path as
 every other third-party installer. When we package a release, retain the

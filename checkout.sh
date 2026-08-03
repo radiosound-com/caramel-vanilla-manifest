@@ -10,7 +10,7 @@ if ! command -v repo >/dev/null 2>&1; then
 fi
 
 if ! command -v git-lfs >/dev/null 2>&1; then
-  echo "git-lfs is required for the OsmAnd prebuilt; install Git LFS and retry." >&2
+  echo "git-lfs is required for the Caramel Vanilla prebuilts; install Git LFS and retry." >&2
   exit 1
 fi
 
@@ -35,6 +35,11 @@ cp "$manifest_root/manifests/manifest_brcm_rpi.xml" \
 (cd "$android_root" && repo sync --current-branch --no-tags)
 
 # repo does not guarantee that LFS objects for a project are hydrated.
-git -C "$android_root/vendor/radiosound/osmand" lfs pull
+for lfs_project in \
+  "$android_root/vendor/radiosound/osmand" \
+  "$android_root/vendor/radiosound/templates-host" \
+  "$android_root/vendor/radiosound/aurora-store"; do
+  git -C "$lfs_project" lfs pull
+done
 
 echo "Caramel Vanilla checkout ready at $android_root"
