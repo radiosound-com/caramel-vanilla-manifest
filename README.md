@@ -88,11 +88,13 @@ app, so a GMS-free image has a complete templates-host implementation.
 
 Caramel Vanilla is the public baseline. Salted Caramel Vanilla is limited to
 Radio Sound's CAN/A2B amplifier overlay and does not duplicate the public device
-tree or general platform work. The store, package-install, microG, and OTA plan
-is in [`docs/caramel-vanilla-platform.md`](docs/caramel-vanilla-platform.md).
+tree or general platform work. The active platform work is tracked in the
+[Caramel Vanilla GitHub issues](https://github.com/radiosound-com/caramel-vanilla-manifest/issues).
 The bounded littleboy-side F-Droid scanner and catalog-import bundle format are
-in [`tools/fdroid-scanner`](tools/fdroid-scanner); it only inspects explicitly
-selected APKs and leaves mirroring and release signing to controlled services.
+in [`tools/fdroid-scanner`](tools/fdroid-scanner); its design and mirror policy
+are tracked in [issue #1](https://github.com/radiosound-com/caramel-vanilla-manifest/issues/1).
+It only inspects explicitly selected APKs and leaves mirroring and release
+signing to controlled services.
 
 ## Published source repositories
 
@@ -111,3 +113,13 @@ The manifest also pins these published Radio Sound forks:
 * [libcamera](https://github.com/radiosound-com/android_external_libcamera)
 * [libudev-zero](https://github.com/radiosound-com/android_external_libudev-zero)
 * [Mesa for Raspberry Pi](https://github.com/radiosound-com/android_external_mesa3d-rpi)
+
+## Credits
+
+Caramel Vanilla builds on the Raspberry Vanilla Android Automotive work led by
+[KonstaKANG](https://github.com/raspberry-vanilla). We are grateful for that
+open-source foundation and upstream device support.
+
+The Raspberry Pi product uses the Apache-2.0 AIDL v6 USB NMEA GNSS HAL from
+[Mark777a](https://github.com/mark777a/AOSP-AIDL-v6-GNSS-HAL), with thanks for
+the upstream project and collaboration.
