@@ -7,7 +7,7 @@ intentionally bounded and does not become an APK mirror:
 * A local lock permits one run at a time; a daily byte budget and per-host
   delay prevent accidental bulk downloads.
 * APK inspection is opt-in by package ID or selection file. The scanner never
-  attempt to download the whole F-Droid catalog.
+  attempts to download the whole F-Droid catalog.
 * APKs are removed after inspection unless `--keep-apks` is supplied.
 * The result records package metadata, manifest findings, SHA-256, index
   provenance, and upstream URLs. It can be signed with an offline-controlled
