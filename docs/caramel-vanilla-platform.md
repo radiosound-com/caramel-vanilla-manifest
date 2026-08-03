@@ -90,6 +90,28 @@ typical APK sizes and completes a 1,453-package category shortlist in roughly
 two to four weeks. The exact cost depends on split APKs and artifact sizes; the
 scanner should measure and enforce bytes rather than assume an average.
 
+### External scanner and catalog import
+
+The APK scanner belongs on littleboy, outside Kubernetes, as a systemd timer or
+a small standalone container. Its cache stays on littleboy and uses the fast
+home connection. It must not receive a kubeconfig, database credentials, or
+general Kubernetes access.
+
+Each run should produce an authenticated catalog-import bundle containing the
+index revision, package metadata, manifest findings, SHA-256 checksums,
+provenance, and upstream URLs. Upload the bundle over HTTPS or a private VPN to
+a staging/import endpoint. The cluster validates the signature and schema,
+checks the bundle contents, and atomically imports it into the catalog; public
+catalog reads use a separate endpoint.
+
+The companion service must use a local run lock, ETag/If-Modified-Since for the
+F-Droid index, one or two concurrent APK downloads, per-host rate limits, and a
+daily byte budget. It deletes APKs that were not selected after inspection.
+Upload authentication should be a narrowly scoped credential or mTLS, and
+catalog release signing remains a separate controlled step. APKs stay upstream
+unless a specific artifact is selected for mirroring, in which case its
+redistribution basis and checksum are recorded.
+
 F-Droid's signed index format and custom-repository model are documented at
 <https://f-droid.org/en/docs/All_our_APIs/> and
 <https://f-droid.org/en/docs/Setup_an_F-Droid_App_Repo/>. A future Caramel Store
@@ -107,6 +129,8 @@ The product packaging is maintained separately in
 [`android_vendor_aurora_store`](https://github.com/radiosound-com/android_vendor_aurora_store);
 the templates renderer packaging is likewise isolated in
 [`android_vendor_car_templates_host`](https://github.com/radiosound-com/android_vendor_car_templates_host).
+Car Settings' in-car install-source screen is maintained in
+[`android_packages_apps_Car_Settings`](https://github.com/radiosound-com/android_packages_apps_Car_Settings/tree/android-16.0).
 
 The first product version should treat Aurora as an optional parked-mode app,
 not as a privileged silent installer. It needs the same in-car install path as
@@ -124,13 +148,17 @@ intent includes a `content://` URI and
 `MANAGE_UNKNOWN_APP_SOURCES` intent resolves to a framework stub in this image;
 that is the source of the unusable “no provider” path.
 
-The product fix is a Car Settings screen that:
+The first product fix is now in the public Car Settings fork under
+`Special app access > Install unknown apps`. It reuses the existing Automotive
+app-op controller and:
 
 - lists installed apps declaring `REQUEST_INSTALL_PACKAGES`;
-- shows the app label, signer, requested source, and current app-op;
-- lets the driver enable/disable that app's install source; and
-- launches the normal `PackageInstaller` flow with a persisted `content://`
-  grant.
+- shows the app label/icon and current app-op state; and
+- lets the driver enable/disable that app's install source per package.
+
+Signer/source details and an end-to-end touch/rotary test remain follow-up work;
+the screen itself does not grant package-install privileges or launch an
+installer on behalf of another app.
 
 It should write only the per-package `android:request_install_packages` app-op.
 Do not grant `INSTALL_PACKAGES` to ordinary apps and do not enable the app-op
@@ -196,26 +224,34 @@ replicated NVMe storage are useful for recovery and capacity, but the services
 below should be treated as unavailable during node maintenance or a storage
 incident.
 
-### Requested services
+### External companion service
+
+The littleboy scanner is the upstream-facing component. It owns the bounded
+APK cache and creates signed bundles; it only needs outbound HTTPS plus access
+to the cluster's bundle-upload endpoint. It does not need direct catalog
+database access.
+
+### Requested cluster services
 
 | Service | Initial shape | Persistent data |
 | --- | --- | --- |
 | Store API/catalog | 1 pod, 0.25–0.5 CPU, 256–512 MiB | PostgreSQL or SQLite backup, catalog index |
-| APK manifest scanner | 1 scheduled worker, 1 CPU, 2 GiB | 20–50 GiB bounded cache |
+| Catalog importer | 1 pod, 0.25–0.5 CPU, 256–512 MiB | validated import bundles and catalog database |
 | OTA metadata/API | 1 pod, 0.25 CPU, 256 MiB | signed release metadata |
 | Artifact storage | 1 object-store instance or existing replicated volume | OTA payloads, selected APKs, checksums |
 | TLS/ingress | use the existing cluster ingress if available | certificates/secrets |
 | Metrics/logs | use existing cluster facilities | ordinary retention only |
 
-The scanner and build jobs must not run on the Kubernetes NUCs unless there is
-no alternative; use littleboy or `.153` for Android and APK builds. The cluster
-should only catalog, scan on a schedule, serve metadata, and host selected
-artifacts.
+The scanner runs on littleboy. Use littleboy or `.153` for Android and APK
+builds as well. The cluster should only validate/import catalog bundles, serve
+metadata, and host selected artifacts.
 
 ### Storage and safety requirements
 
 - one HTTPS hostname for the catalog and one for OTA artifacts, or a single
   ingress with separate paths;
+- a separate authenticated staging/import endpoint that is not exposed as a
+  public catalog write API;
 - a persistent volume backed by the existing replicated NVMe storage;
 - quotas for scanner cache and APK artifacts so a bad upstream index cannot fill
   the cluster;

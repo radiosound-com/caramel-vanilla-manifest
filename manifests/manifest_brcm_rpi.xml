@@ -23,6 +23,10 @@
   <project path="vendor/radiosound/templates-host" name="radiosound-com/android_vendor_car_templates_host" remote="github" revision="android-16.0" />
   <project path="vendor/radiosound/aurora-store" name="radiosound-com/android_vendor_aurora_store" remote="github" revision="android-16.0" />
 
+  <!-- Car Settings adds the in-car per-app install-source control. -->
+  <remove-project name="platform/packages/apps/Car/Settings" />
+  <project path="packages/apps/Car/Settings" name="radiosound-com/android_packages_apps_Car_Settings" remote="github" revision="android-16.0" />
+
   <!-- USB NMEA GNSS AIDL HAL, consumed directly from Mark777a's Apache-2.0 repository. -->
   <project path="external/mark777a/AOSP-AIDL-v6-GNSS-HAL" name="mark777a/AOSP-AIDL-v6-GNSS-HAL" remote="github" revision="main" />
 

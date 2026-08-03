@@ -79,6 +79,7 @@ is in [`docs/caramel-vanilla-platform.md`](docs/caramel-vanilla-platform.md).
 * [OsmAnd product packaging](https://github.com/radiosound-com/android_vendor_osmand)
 * [Templates Host product packaging](https://github.com/radiosound-com/android_vendor_car_templates_host)
 * [Aurora Store product packaging](https://github.com/radiosound-com/android_vendor_aurora_store)
+* [Car Settings install-source integration](https://github.com/radiosound-com/android_packages_apps_Car_Settings/tree/android-16.0)
 * [Caramel Vanilla templates host](https://github.com/radiosound-com/android_packages_apps_Car_TemplatesHost)
 * [OsmAnd AAOS fork](https://github.com/radiosound-com/OsmAnd/tree/caramel-vanilla-osmand-aaos)
 * [Mark777a AIDL v6 GNSS HAL](https://github.com/mark777a/AOSP-AIDL-v6-GNSS-HAL)
