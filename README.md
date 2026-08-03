@@ -71,6 +71,9 @@ Caramel Vanilla is the public baseline. Salted Caramel Vanilla is limited to
 Radio Sound's CAN/A2B amplifier overlay and does not duplicate the public device
 tree or general platform work. The store, package-install, microG, and OTA plan
 is in [`docs/caramel-vanilla-platform.md`](docs/caramel-vanilla-platform.md).
+The bounded littleboy-side F-Droid scanner and catalog-import bundle format are
+in [`tools/fdroid-scanner`](tools/fdroid-scanner); it only inspects explicitly
+selected APKs and leaves mirroring and release signing to controlled services.
 
 ## Published source repositories
 

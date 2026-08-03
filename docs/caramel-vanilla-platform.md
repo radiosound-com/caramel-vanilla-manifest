@@ -231,6 +231,13 @@ APK cache and creates signed bundles; it only needs outbound HTTPS plus access
 to the cluster's bundle-upload endpoint. It does not need direct catalog
 database access.
 
+The first implementation lives in the public manifest repository under
+[`tools/fdroid-scanner`](https://github.com/radiosound-com/caramel-vanilla-manifest/tree/main/tools/fdroid-scanner).
+It uses Python's standard library plus the Android build-tree `aapt2`, requires
+an explicit package selection, enforces a local lock/daily byte budget and
+per-host delay, and removes APKs after inspection. This keeps candidate
+discovery useful without turning littleboy into an unbounded mirror.
+
 ### Requested cluster services
 
 | Service | Initial shape | Persistent data |

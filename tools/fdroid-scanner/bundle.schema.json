@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://caramel-vanilla.radiosound.com/schemas/catalog-import-v1.json",
+  "title": "Caramel Vanilla catalog import bundle",
+  "type": "object",
+  "required": ["$schema", "bundle_version", "generated_at", "source", "policy", "packages"],
+  "properties": {
+    "$schema": {"const": "https://caramel-vanilla.radiosound.com/schemas/catalog-import-v1.json"},
+    "bundle_version": {"const": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "source": {
+      "type": "object",
+      "required": ["name", "index_url", "index"],
+      "properties": {
+        "name": {"const": "F-Droid"},
+        "index_url": {"type": "string", "format": "uri", "pattern": "^https://"},
+        "index": {"type": "object"}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["daily_byte_budget", "bytes_used", "max_apk_bytes", "selected_packages"],
+      "properties": {
+        "daily_byte_budget": {"type": "integer", "minimum": 1},
+        "bytes_used": {"type": "integer", "minimum": 0},
+        "max_apk_bytes": {"type": "integer", "minimum": 1},
+        "selected_packages": {"type": "array", "items": {"type": "string", "pattern": "^[A-Za-z0-9_.]+$"}}
+      }
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["package_name", "status"],
+        "properties": {
+          "package_name": {"type": "string"},
+          "status": {"enum": ["inspected", "not_in_index"]},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "apk_url": {"type": "string", "format": "uri", "pattern": "^https://"},
+          "manifest_findings": {"type": "object"}
+        }
+      }
+    }
+  }
+}
