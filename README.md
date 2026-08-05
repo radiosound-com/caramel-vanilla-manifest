@@ -53,6 +53,19 @@ m bootimage systemimage vendorimage
 ./rpi5-mkimg.sh
 ```
 
+`rpi5-mkimg.sh` keeps the historical 15.3 GB default for compatibility. To
+make userdata consume the remaining space on a particular medium, pass its
+logical byte capacity explicitly; for example, a 250.06 GB disk reports
+`250059350016` bytes on macOS:
+
+```sh
+RPI5_IMAGE_SIZE_BYTES=250059350016 ./rpi5-mkimg.sh
+```
+
+The script creates a sparse image, retains the fixed boot/system/vendor/
+metadata layout, and formats the final userdata partition across all remaining
+sectors. Verify the target disk capacity before writing a raw image.
+
 To build the Android 16 generic automotive AVD, prepare the upstream generic-car
 artifact-path compatibility and select the arm64 car product:
 
