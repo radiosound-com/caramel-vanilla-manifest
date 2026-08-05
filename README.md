@@ -80,6 +80,21 @@ The default mode asks for a typed confirmation. `--yes` is available for a
 target that has already been independently verified. No flash is performed by
 the checkout or build scripts.
 
+For iterative development, use the partition updater instead of rewriting the
+full expanded userdata partition:
+
+```sh
+./caramel-vanilla-manifest/scripts/update-rpi5-partitions.sh \
+  artifacts/rpi5-usb-nvme-waveshare-20260805-ed37e67.img.gz /dev/diskN
+```
+
+It requires the existing 250-GB partition geometry, writes only boot/system/
+vendor, and preserves metadata/userdata by default. Add `--clean-userdata` to
+format those existing metadata and userdata partitions locally with `mke2fs`;
+this is still much faster than streaming the 229-GB userdata region from the
+image. Use the full-image flasher when repartitioning or establishing a truly
+fresh disk layout.
+
 To build the Android 16 generic automotive AVD, prepare the upstream generic-car
 artifact-path compatibility and select the arm64 car product:
 
