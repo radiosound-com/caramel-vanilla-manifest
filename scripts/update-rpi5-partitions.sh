@@ -44,6 +44,8 @@ part_system=/dev/disk${disk_number}s5
 part_vendor=/dev/disk${disk_number}s6
 part_metadata=/dev/disk${disk_number}s7
 part_userdata=/dev/disk${disk_number}s3
+raw_metadata=/dev/rdisk${disk_number}s7
+raw_userdata=/dev/rdisk${disk_number}s3
 
 partition_value() {
   local partition=$1
@@ -124,9 +126,9 @@ if ((clean_userdata)); then
   fi
   [[ -n "$mke2fs" ]] || die "mke2fs is required for --clean-userdata"
   echo "Formatting metadata..."
-  sudo -n "$mke2fs" -t ext4 -I 512 -L metadata "$part_metadata"
+  sudo -n "$mke2fs" -t ext4 -I 512 -L metadata "$raw_metadata"
   echo "Formatting userdata..."
-  sudo -n "$mke2fs" -t ext4 -I 512 -L userdata "$part_userdata"
+  sudo -n "$mke2fs" -t ext4 -I 512 -L userdata "$raw_userdata"
 fi
 
 sync
