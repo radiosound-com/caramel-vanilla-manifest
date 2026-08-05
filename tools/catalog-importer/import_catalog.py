@@ -44,7 +44,14 @@ def read_json(path: Path) -> dict[str, Any]:
 
 
 def require_https(value: Any, field: str) -> str:
-    if not isinstance(value, str) or urlparse(value).scheme != "https":
+    parsed = urlparse(value) if isinstance(value, str) else None
+    if (
+        parsed is None
+        or parsed.scheme != "https"
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+    ):
         raise ImportError(f"{field} must be an HTTPS URL")
     return value
 
@@ -80,6 +87,8 @@ def validate_bundle(bundle: dict[str, Any], max_age_hours: float = 48.0) -> None
     if source.get("name") != "F-Droid":
         raise ImportError("unsupported catalog source")
     require_https(source.get("index_url"), "source.index_url")
+    if not isinstance(source.get("index"), dict):
+        raise ImportError("source.index must be an object")
 
     budget = policy.get("daily_byte_budget")
     bytes_used = policy.get("bytes_used")
@@ -87,19 +96,25 @@ def validate_bundle(bundle: dict[str, Any], max_age_hours: float = 48.0) -> None
         raise ImportError("policy.daily_byte_budget must be a positive integer")
     if not isinstance(bytes_used, int) or bytes_used < 0 or bytes_used > budget:
         raise ImportError("policy.bytes_used exceeds the daily byte budget")
+    max_apk_bytes = policy.get("max_apk_bytes")
+    if not isinstance(max_apk_bytes, int) or max_apk_bytes < 1:
+        raise ImportError("policy.max_apk_bytes must be a positive integer")
     selected = policy.get("selected_packages")
     if not isinstance(selected, list) or any(
         not isinstance(item, str) or not PACKAGE_NAME.fullmatch(item) for item in selected
     ):
         raise ImportError("policy.selected_packages contains an invalid package name")
+    if len(selected) != len(set(selected)):
+        raise ImportError("policy.selected_packages contains duplicates")
 
     mirrors = source.get("advertised_mirrors", [])
-    if not isinstance(mirrors, list) or any(
-        not isinstance(item, str) or urlparse(item).scheme != "https" for item in mirrors
-    ):
-        raise ImportError("source.advertised_mirrors must contain HTTPS URLs")
+    if not isinstance(mirrors, list):
+        raise ImportError("source.advertised_mirrors must be an array")
+    for mirror in mirrors:
+        require_https(mirror, "source.advertised_mirrors")
 
     seen: set[str] = set()
+    selected_set = set(selected)
     for package in packages:
         if not isinstance(package, dict):
             raise ImportError("each package must be an object")
@@ -121,12 +136,32 @@ def validate_bundle(bundle: dict[str, Any], max_age_hours: float = 48.0) -> None
         require_https(package.get("canonical_apk_url"), f"{name}.canonical_apk_url")
         if package.get("hash_matches_index") is not True:
             raise ImportError(f"{name} did not match the F-Droid index checksum")
+        downloaded_size = package.get("downloaded_size")
+        if (
+            not isinstance(downloaded_size, int)
+            or downloaded_size < 1
+            or downloaded_size > max_apk_bytes
+        ):
+            raise ImportError(f"{name} has an invalid downloaded APK size")
         mirror = package.get("mirror_used")
         if mirror is not None:
             require_https(mirror, f"{name}.mirror_used")
         findings = package.get("manifest_findings", {})
         if not isinstance(findings, dict):
             raise ImportError(f"{name}.manifest_findings must be an object")
+        provenance = package.get("provenance")
+        if not isinstance(provenance, dict):
+            raise ImportError(f"{name}.provenance must be an object")
+        require_https(provenance.get("index_url"), f"{name}.provenance.index_url")
+        require_https(provenance.get("download_url"), f"{name}.provenance.download_url")
+        index_sha256 = provenance.get("index_sha256")
+        if not isinstance(index_sha256, str) or not SHA256.fullmatch(index_sha256):
+            raise ImportError(f"{name}.provenance.index_sha256 is invalid")
+        upstream_urls = package.get("upstream_urls", {})
+        if not isinstance(upstream_urls, dict):
+            raise ImportError(f"{name}.upstream_urls must be an object")
+    if seen != selected_set:
+        raise ImportError("packages must exactly match policy.selected_packages")
 
 
 def verify_signature(bundle_path: Path, signature_path: Path, public_key: Path) -> None:
@@ -199,7 +234,7 @@ def write_json_atomic(path: Path, value: dict[str, Any]) -> None:
             pass
 
 
-def import_sqlite(path: Path, bundle: dict[str, Any]) -> None:
+def import_sqlite(path: Path, bundle: dict[str, Any], bundle_sha256: str | None = None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(path)
     try:
@@ -229,14 +264,17 @@ def import_sqlite(path: Path, bundle: dict[str, Any]) -> None:
         )
         connection.execute("DELETE FROM packages")
         connection.execute("DELETE FROM catalog_meta")
+        metadata = [
+            ("bundle_version", str(bundle["bundle_version"])),
+            ("generated_at", bundle["generated_at"]),
+            ("source", bundle["source"]["name"]),
+            ("source_index_url", bundle["source"]["index_url"]),
+        ]
+        if bundle_sha256 is not None:
+            metadata.append(("bundle_sha256", bundle_sha256))
         connection.executemany(
             "INSERT INTO catalog_meta(key, value) VALUES(?, ?)",
-            [
-                ("bundle_version", str(bundle["bundle_version"])),
-                ("generated_at", bundle["generated_at"]),
-                ("source", bundle["source"]["name"]),
-                ("source_index_url", bundle["source"]["index_url"]),
-            ],
+            metadata,
         )
         rows = []
         for package in bundle["packages"]:

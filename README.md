@@ -72,6 +72,12 @@ The build includes the Caramel Vanilla OsmAnd Automotive prebuilt. Git LFS is
 used because the APK is larger than GitHub's regular-file limit; `checkout.sh`
 hydrates it after `repo sync`.
 
+The dependency-free [Caramel Store catalog API](tools/catalog-api) accepts
+authenticated signed catalog imports and serves the automotive-filtered read
+index. Its OKD deployment is maintained separately in the
+[caramel-store-manifests](https://github.com/radiosound-com/caramel-store-manifests)
+repository.
+
 ## What it includes
 
 Caramel Vanilla is a GMS-free Android Automotive OS build for Raspberry Pi 5,
