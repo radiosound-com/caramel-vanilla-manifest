@@ -66,6 +66,20 @@ The script creates a sparse image, retains the fixed boot/system/vendor/
 metadata layout, and formats the final userdata partition across all remaining
 sectors. Verify the target disk capacity before writing a raw image.
 
+For a removable target, `scripts/flash-rpi5-image.sh` performs the safety
+checks and authenticates `sudo` once before streaming a compressed image. It
+requires an explicit external whole-disk path and rejects internal or small
+disks:
+
+```sh
+./caramel-vanilla-manifest/scripts/flash-rpi5-image.sh \
+  artifacts/rpi5-usb-nvme-waveshare-20260805-7976ebd.img.gz /dev/diskN
+```
+
+The default mode asks for a typed confirmation. `--yes` is available for a
+target that has already been independently verified. No flash is performed by
+the checkout or build scripts.
+
 To build the Android 16 generic automotive AVD, prepare the upstream generic-car
 artifact-path compatibility and select the arm64 car product:
 
