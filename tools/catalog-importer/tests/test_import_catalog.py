@@ -37,8 +37,14 @@ def inspected(name="org.example.app", automotive=True):
         "version_code": 1,
         "sha256": digest,
         "hash_matches_index": True,
+        "downloaded_size": 5,
         "apk_url": "https://f-droid.org/repo/org.example.app_1.apk",
         "canonical_apk_url": "https://f-droid.org/repo/org.example.app_1.apk",
+        "provenance": {
+            "index_url": "https://f-droid.org/repo/index-v2.json",
+            "index_sha256": "b" * 64,
+            "download_url": "https://f-droid.org/repo/org.example.app_1.apk",
+        },
         "manifest_findings": {
             "version_name": "1.0",
             "automotive_candidate": automotive,

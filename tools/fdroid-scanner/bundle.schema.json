@@ -10,7 +10,7 @@
     "generated_at": {"type": "string", "format": "date-time"},
     "source": {
       "type": "object",
-      "required": ["name", "index_url", "index"],
+      "required": ["name", "index_url", "index", "advertised_mirrors"],
       "properties": {
         "name": {"const": "F-Droid"},
         "index_url": {"type": "string", "format": "uri", "pattern": "^https://"},
@@ -41,14 +41,34 @@
         "type": "object",
         "required": ["package_name", "status"],
         "properties": {
-          "package_name": {"type": "string"},
+          "package_name": {"type": "string", "pattern": "^[A-Za-z0-9_.]+$"},
           "status": {"enum": ["inspected", "not_in_index"]},
           "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
           "apk_url": {"type": "string", "format": "uri", "pattern": "^https://"},
           "canonical_apk_url": {"type": "string", "format": "uri", "pattern": "^https://"},
           "mirror_used": {"type": "string", "format": "uri", "pattern": "^https://"},
+          "downloaded_size": {"type": "integer", "minimum": 1},
+          "hash_matches_index": {"const": true},
+          "provenance": {"type": "object"},
+          "upstream_urls": {"type": "object"},
           "manifest_findings": {"type": "object"}
-        }
+        },
+        "oneOf": [
+          {
+            "properties": {"status": {"const": "inspected"}},
+            "required": [
+              "sha256",
+              "apk_url",
+              "canonical_apk_url",
+              "downloaded_size",
+              "hash_matches_index",
+              "provenance",
+              "upstream_urls",
+              "manifest_findings"
+            ]
+          },
+          {"properties": {"status": {"const": "not_in_index"}}}
+        ]
       }
     }
   }

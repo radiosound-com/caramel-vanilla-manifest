@@ -69,6 +69,10 @@ The importer should verify the detached signature from the
 duplicate index revisions, and commit the catalog transaction atomically.
 Public catalog reads should use a separate endpoint and credential.
 
+The repository's dependency-free [catalog API](../catalog-api) implements
+that import/read contract for local testing and container builds. The OKD
+deployment remains a separate concern.
+
 For local or staging validation, the repository includes a dependency-free
 reference importer. It replaces the SQLite catalog in one transaction and
 writes an automotive-filtered read index with an atomic rename:
