@@ -81,17 +81,56 @@ sudo -n true
 diskutil unmountDisk "$disk"
 
 if command -v pv >/dev/null 2>&1; then
-  progress=(pv -p -t -e -r -b -s "$(stat -f '%z' "$image")")
+  # A gzip file's size is not the size of the raw image, so do not show a
+  # misleading percentage for compressed input.
+  if [[ "$image" == *.gz ]]; then
+    progress=(pv -p -t -e -r -b)
+  else
+    progress=(pv -p -t -e -r -b -s "$(stat -f '%z' "$image")")
+  fi
 else
   progress=(cat)
 fi
 
 if [[ "$image" == *.gz ]]; then
-  gzip -dc "$image" | "${progress[@]}" | sudo -n dd of="$raw_disk" bs=16m conv=sync
+  gzip -dc "$image" \
+    | "${progress[@]}" \
+    | sudo -n dd iflag=fullblock of="$raw_disk" bs=16m conv=fsync
 else
-  cat "$image" | "${progress[@]}" | sudo -n dd of="$raw_disk" bs=16m conv=sync
+  cat "$image" \
+    | "${progress[@]}" \
+    | sudo -n dd iflag=fullblock of="$raw_disk" bs=16m conv=fsync
 fi
 
 sync
+
+# A short read from a pipe must never be silently padded into the target. Check
+# the MBR and the FAT32 boot sector before ejecting so a broken stream is
+# caught while the disk is still attached and diagnosable.
+verify_sector() {
+  local label=$1
+  local skip=$2
+  local expected actual
+  expected=$(mktemp "${TMPDIR:-/tmp}/caramel-flash-expected.XXXXXX")
+  actual=$(mktemp "${TMPDIR:-/tmp}/caramel-flash-actual.XXXXXX")
+  if [[ "$image" == *.gz ]]; then
+    gzip -dc "$image" \
+      | dd iflag=fullblock bs=512 skip="$skip" count=1 2>/dev/null > "$expected"
+  else
+    dd if="$image" iflag=fullblock bs=512 skip="$skip" count=1 2>/dev/null > "$expected"
+  fi
+  sudo -n dd if="$raw_disk" iflag=fullblock bs=512 skip="$skip" count=1 \
+    of="$actual" 2>/dev/null
+  if ! cmp -s "$expected" "$actual"; then
+    rm -f "$expected" "$actual"
+    echo "Verification failed: $label sector on $raw_disk differs from image" >&2
+    exit 1
+  fi
+  rm -f "$expected" "$actual"
+  echo "Verified $label sector"
+}
+
+verify_sector mbr 0
+verify_sector boot 2048
 diskutil eject "$disk"
 echo "Flash complete and disk ejected: $disk"
