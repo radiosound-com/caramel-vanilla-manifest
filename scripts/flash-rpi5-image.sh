@@ -111,11 +111,23 @@ verify_sector() {
   local label=$1
   local skip=$2
   local expected actual
+  local -a source_status
   expected=$(mktemp "${TMPDIR:-/tmp}/caramel-flash-expected.XXXXXX")
   actual=$(mktemp "${TMPDIR:-/tmp}/caramel-flash-actual.XXXXXX")
   if [[ "$image" == *.gz ]]; then
+    # dd intentionally stops after one sector; gzip may observe that closed
+    # pipe and exit 141 even though the requested sector was extracted.
+    set +e
     gzip -dc "$image" \
       | dd iflag=fullblock bs=512 skip="$skip" count=1 2>/dev/null > "$expected"
+    source_status=("${PIPESTATUS[@]}")
+    set -e
+    if [[ "${source_status[1]:-1}" -ne 0 || \
+          ( "${source_status[0]:-1}" -ne 0 && "${source_status[0]:-1}" -ne 141 ) ]]; then
+      rm -f "$expected" "$actual"
+      echo "Verification failed: could not extract $label sector from image" >&2
+      exit 1
+    fi
   else
     dd if="$image" iflag=fullblock bs=512 skip="$skip" count=1 2>/dev/null > "$expected"
   fi
