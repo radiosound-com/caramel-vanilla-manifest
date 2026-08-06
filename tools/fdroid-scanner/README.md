@@ -36,6 +36,41 @@ python3 "$CARAMEL_MANIFEST/tools/fdroid-scanner/scan.py" \
   --signing-key /secure/path/catalog-import-signing-key.pem
 ```
 
+## Metadata-only refresh
+
+The scanner snapshots the selected packages' F-Droid display metadata from the
+same verified `index-v2.json` revision as the APK findings. The metadata-only
+command refreshes that snapshot without downloading or inspecting APKs; it
+preserves the existing APK checksums, versions, and manifest findings, then
+signs and uploads a complete replacement bundle through the existing import
+endpoint:
+
+```sh
+python3 tools/fdroid-scanner/refresh_metadata.py \
+  --cache-dir /var/lib/caramel-store-scanner \
+  --bundle /var/lib/caramel-store-scanner/catalog-import.json \
+  --signature /var/lib/caramel-store-scanner/catalog-import.json.sig \
+  --signing-key /etc/caramel-store/catalog-signing-key.pem \
+  --upload-url https://caramel-vanilla-store.apps.radiosound.com/v1/import \
+  --bearer-token-file /etc/caramel-store/import-token
+```
+
+Run this on `littleboy`, beside the existing scanner. The provided systemd
+units schedule it daily with a randomized delay and use the same scanner lock,
+cache, signing key, and scoped import credential:
+
+```sh
+sudo install -m 0644 tools/fdroid-scanner/systemd/caramel-store-metadata-refresh.service /etc/systemd/system/
+sudo install -m 0644 tools/fdroid-scanner/systemd/caramel-store-metadata-refresh.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now caramel-store-metadata-refresh.timer
+systemctl list-timers caramel-store-metadata-refresh.timer
+```
+
+The unit files contain paths and endpoint names only. Keep the signing key and
+import token out of the repository and provision them on `littleboy` through
+the existing secret-management process.
+
 The selection file is one package ID per line. Comments beginning with `#`
 are ignored. Keep it curated; automotive compatibility is a manifest finding,
 not a claim that every F-Droid app is safe to run while driving.

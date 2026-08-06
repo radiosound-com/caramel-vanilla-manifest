@@ -27,6 +27,7 @@ from urllib.parse import urlparse
 SCHEMA = "https://caramel-vanilla.radiosound.com/schemas/catalog-import-v1.json"
 PACKAGE_NAME = re.compile(r"^[A-Za-z0-9_.]+$")
 SHA256 = re.compile(r"^[a-f0-9]{64}$")
+LOCALE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*$")
 
 
 class ImportError(ValueError):
@@ -53,6 +54,57 @@ def require_https(value: Any, field: str) -> str:
         or parsed.password is not None
     ):
         raise ImportError(f"{field} must be an HTTPS URL")
+    return value
+
+
+def validate_metadata(value: Any, package_name: str) -> dict[str, Any]:
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise ImportError(f"{package_name}.metadata must be an object")
+    allowed = {
+        "locale",
+        "display_name",
+        "summary",
+        "description",
+        "categories",
+        "license",
+        "icon_url",
+        "feature_graphic_url",
+        "screenshot_urls",
+    }
+    unknown = set(value) - allowed
+    if unknown:
+        raise ImportError(f"{package_name}.metadata has unsupported fields: {sorted(unknown)}")
+    locale = value.get("locale")
+    if locale is not None and (not isinstance(locale, str) or not LOCALE.fullmatch(locale)):
+        raise ImportError(f"{package_name}.metadata.locale is invalid")
+    for key, limit in (
+        ("display_name", 240),
+        ("summary", 500),
+        ("description", 20000),
+        ("license", 120),
+    ):
+        item = value.get(key)
+        if item is not None and (not isinstance(item, str) or not item.strip() or len(item) > limit):
+            raise ImportError(f"{package_name}.metadata.{key} is invalid")
+    categories = value.get("categories")
+    if categories is not None:
+        if (
+            not isinstance(categories, list)
+            or len(categories) > 12
+            or any(not isinstance(item, str) or not item.strip() or len(item) > 80 for item in categories)
+        ):
+            raise ImportError(f"{package_name}.metadata.categories is invalid")
+    for key in ("icon_url", "feature_graphic_url"):
+        if value.get(key) is not None:
+            require_https(value[key], f"{package_name}.metadata.{key}")
+    screenshots = value.get("screenshot_urls")
+    if screenshots is not None:
+        if not isinstance(screenshots, list) or len(screenshots) > 6:
+            raise ImportError(f"{package_name}.metadata.screenshot_urls is invalid")
+        for item in screenshots:
+            require_https(item, f"{package_name}.metadata.screenshot_urls")
     return value
 
 
@@ -149,6 +201,7 @@ def validate_bundle(bundle: dict[str, Any], max_age_hours: float = 48.0) -> None
         findings = package.get("manifest_findings", {})
         if not isinstance(findings, dict):
             raise ImportError(f"{name}.manifest_findings must be an object")
+        validate_metadata(package.get("metadata"), name)
         provenance = package.get("provenance")
         if not isinstance(provenance, dict):
             raise ImportError(f"{name}.provenance must be an object")
@@ -199,6 +252,7 @@ def filtered_index(bundle: dict[str, Any]) -> dict[str, Any]:
                 "version_name": findings.get("version_name"),
                 "apk_url": package["canonical_apk_url"],
                 "sha256": package["sha256"],
+                "metadata": package.get("metadata", {}),
                 "upstream_urls": package.get("upstream_urls", {}),
                 "manifest_findings": {
                     "automotive_candidate": True,
@@ -257,6 +311,7 @@ def import_sqlite(path: Path, bundle: dict[str, Any], bundle_sha256: str | None 
                 version_name TEXT,
                 apk_url TEXT,
                 sha256 TEXT,
+                metadata TEXT NOT NULL,
                 manifest_findings TEXT NOT NULL,
                 upstream_urls TEXT NOT NULL
             )
@@ -286,6 +341,7 @@ def import_sqlite(path: Path, bundle: dict[str, Any], bundle_sha256: str | None 
                     package.get("manifest_findings", {}).get("version_name"),
                     package.get("canonical_apk_url"),
                     package.get("sha256"),
+                    json.dumps(package.get("metadata", {}), sort_keys=True),
                     json.dumps(package.get("manifest_findings", {}), sort_keys=True),
                     json.dumps(package.get("upstream_urls", {}), sort_keys=True),
                 )
@@ -294,8 +350,8 @@ def import_sqlite(path: Path, bundle: dict[str, Any], bundle_sha256: str | None 
             """
             INSERT INTO packages(
                 package_name, status, version_code, version_name, apk_url,
-                sha256, manifest_findings, upstream_urls
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                sha256, metadata, manifest_findings, upstream_urls
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             rows,
         )

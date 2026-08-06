@@ -13,6 +13,7 @@ from scan import (
     apk_url,
     download_apk,
     latest_version,
+    metadata_snapshot,
     metadata_urls,
     run_aapt2,
     write_json_atomic,
@@ -145,6 +146,40 @@ class ScannerTests(unittest.TestCase):
             {
                 "sourceCode": "https://github.com/example/app",
                 "webSite": "https://example.com",
+            },
+        )
+
+    def test_metadata_snapshot_selects_english_metadata_and_bounds_assets(self):
+        record = {
+            "metadata": {
+                "name": {"en-US": "Example Maps"},
+                "summary": {"en-US": "Maps &amp; navigation"},
+                "description": {"en-US": "<p>Find places.</p><ul><li>Offline</li></ul>"},
+                "categories": ["Navigation"],
+                "license": "Apache-2.0",
+                "icon": {"en-US": {"name": "/org.example/en-US/icon.png"}},
+                "featureGraphic": {"en-US": {"name": "/org.example/en-US/feature.jpg"}},
+                "screenshots": {
+                    "phone": {
+                        "en-US": [{"name": "/org.example/en-US/phoneScreenshots/1.png"}]
+                    }
+                },
+            }
+        }
+        self.assertEqual(
+            metadata_snapshot(record, "https://f-droid.org/repo/index-v2.json"),
+            {
+                "locale": "en-US",
+                "display_name": "Example Maps",
+                "summary": "Maps & navigation",
+                "description": "Find places.\n\nOffline",
+                "categories": ["Navigation"],
+                "license": "Apache-2.0",
+                "icon_url": "https://f-droid.org/repo/org.example/en-US/icon.png",
+                "feature_graphic_url": "https://f-droid.org/repo/org.example/en-US/feature.jpg",
+                "screenshot_urls": [
+                    "https://f-droid.org/repo/org.example/en-US/phoneScreenshots/1.png"
+                ],
             },
         )
 

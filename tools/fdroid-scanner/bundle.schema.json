@@ -50,6 +50,25 @@
           "downloaded_size": {"type": "integer", "minimum": 1},
           "hash_matches_index": {"const": true},
           "provenance": {"type": "object"},
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "locale": {"type": "string", "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*$"},
+              "display_name": {"type": "string", "minLength": 1, "maxLength": 240},
+              "summary": {"type": "string", "minLength": 1, "maxLength": 500},
+              "description": {"type": "string", "minLength": 1, "maxLength": 20000},
+              "categories": {"type": "array", "maxItems": 12, "items": {"type": "string", "maxLength": 80}},
+              "license": {"type": "string", "maxLength": 120},
+              "icon_url": {"type": "string", "format": "uri", "pattern": "^https://"},
+              "feature_graphic_url": {"type": "string", "format": "uri", "pattern": "^https://"},
+              "screenshot_urls": {
+                "type": "array",
+                "maxItems": 6,
+                "items": {"type": "string", "format": "uri", "pattern": "^https://"}
+              }
+            }
+          },
           "upstream_urls": {"type": "object"},
           "manifest_findings": {"type": "object"}
         },

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the Caramel Store metadata refresh daily
+
+[Timer]
+OnCalendar=*-*-* 04:10:00
+RandomizedDelaySec=20m
+Persistent=true
+Unit=caramel-store-metadata-refresh.service
+
+[Install]
+WantedBy=timers.target

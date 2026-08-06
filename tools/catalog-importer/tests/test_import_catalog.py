@@ -52,6 +52,14 @@ def inspected(name="org.example.app", automotive=True):
             "car_app_service": False,
         },
         "upstream_urls": {},
+        "metadata": {
+            "locale": "en-US",
+            "display_name": "Example App",
+            "summary": "A test application",
+            "categories": ["Navigation"],
+            "license": "Apache-2.0",
+            "icon_url": "https://f-droid.org/repo/org.example/en-US/icon.png",
+        },
     }
 
 
@@ -61,6 +69,7 @@ class ImporterTests(unittest.TestCase):
         validate_bundle(value)
         result = filtered_index(value)
         self.assertEqual(["org.example.app"], [item["package_name"] for item in result["entries"]])
+        self.assertEqual("Example App", result["entries"][0]["metadata"]["display_name"])
 
     def test_rejects_duplicate_package(self):
         value = bundle(inspected(), inspected())
@@ -76,13 +85,16 @@ class ImporterTests(unittest.TestCase):
             connection = sqlite3.connect(database)
             try:
                 rows = connection.execute(
-                    "SELECT package_name, status FROM packages ORDER BY package_name"
+                    "SELECT package_name, status, metadata FROM packages ORDER BY package_name"
                 ).fetchall()
             finally:
                 connection.close()
         self.assertEqual(
             rows,
-            [("org.example.app", "inspected"), ("org.missing", "not_in_index")],
+            [
+                ("org.example.app", "inspected", '{"categories": ["Navigation"], "display_name": "Example App", "icon_url": "https://f-droid.org/repo/org.example/en-US/icon.png", "license": "Apache-2.0", "locale": "en-US", "summary": "A test application"}'),
+                ("org.missing", "not_in_index", "{}"),
+            ],
         )
 
 

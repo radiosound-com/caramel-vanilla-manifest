@@ -1,0 +1,17 @@
+[Unit]
+Description=Refresh Caramel Store F-Droid metadata snapshot
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=caramel-scanner
+Group=caramel-scanner
+WorkingDirectory=/opt/caramel-vanilla-manifest
+ExecStart=/usr/bin/python3 /opt/caramel-vanilla-manifest/tools/fdroid-scanner/refresh_metadata.py --cache-dir /var/lib/caramel-store-scanner --bundle /var/lib/caramel-store-scanner/catalog-import.json --signature /var/lib/caramel-store-scanner/catalog-import.json.sig --signing-key /etc/caramel-store/catalog-signing-key.pem --upload-url https://caramel-vanilla-store.apps.radiosound.com/v1/import --bearer-token-file /etc/caramel-store/import-token
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/caramel-store-scanner
+

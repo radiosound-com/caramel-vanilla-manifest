@@ -36,6 +36,12 @@ def inspected(name: str = "org.example.app", automotive: bool = True) -> dict:
             "car_app_service": False,
         },
         "upstream_urls": {"sourceCode": "https://github.com/example/app"},
+        "metadata": {
+            "locale": "en-US",
+            "display_name": "Example App",
+            "summary": "A test application",
+            "icon_url": "https://f-droid.org/repo/org.example/en-US/icon.png",
+        },
     }
 
 
@@ -173,6 +179,7 @@ class CatalogHTTPTests(unittest.TestCase):
         status, body = self.request("GET", "/v1/catalog")
         self.assertEqual(200, status)
         self.assertEqual("org.example.app", json.loads(body)["entries"][0]["package_name"])
+        self.assertEqual("Example App", json.loads(body)["entries"][0]["metadata"]["display_name"])
         status, body = self.request("GET", "/v1/catalog/org.example.app")
         self.assertEqual(200, status)
         self.assertEqual("org.example.app", json.loads(body)["package_name"])

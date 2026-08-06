@@ -16,6 +16,8 @@ import contextlib
 import datetime as dt
 import fcntl
 import hashlib
+from html import unescape
+from html.parser import HTMLParser
 import json
 import os
 import random
@@ -39,6 +41,12 @@ DEFAULT_MAX_APK_BYTES = 512 * 1024 * 1024
 DEFAULT_RETRY_COUNT = 3
 DEFAULT_RETRY_BACKOFF = 1.0
 RETRYABLE_HTTP_CODES = frozenset({408, 425, 429, 500, 502, 503, 504})
+DEFAULT_METADATA_LOCALE = "en-US"
+MAX_METADATA_NAME = 240
+MAX_METADATA_SUMMARY = 500
+MAX_METADATA_DESCRIPTION = 20_000
+MAX_METADATA_CATEGORIES = 12
+MAX_METADATA_SCREENSHOTS = 6
 
 
 class ScanError(RuntimeError):
@@ -309,6 +317,56 @@ def metadata_urls(record: dict[str, Any]) -> dict[str, str]:
     return result
 
 
+class _DescriptionText(HTMLParser):
+    """Convert F-Droid's small HTML descriptions into safe display text."""
+
+    BREAK_TAGS = frozenset({"br", "div", "h1", "h2", "h3", "li", "p"})
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in self.BREAK_TAGS:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in self.BREAK_TAGS:
+            self.parts.append("\n")
+
+    def handle_data(self, data: str) -> None:
+        self.parts.append(data)
+
+
+def _plain_text(value: Any, limit: int) -> str | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    parser = _DescriptionText()
+    parser.feed(value)
+    parser.close()
+    lines = [re.sub(r"\s+", " ", line).strip() for line in "".join(parser.parts).splitlines()]
+    result = "\n\n".join(line for line in lines if line)
+    return result[:limit].rstrip() or None
+
+
+def _localized_value(value: Any, locale: str) -> Any:
+    if not isinstance(value, dict):
+        return value
+    for key in (locale, "en-US", "en-GB", "en"):
+        if key in value:
+            return value[key]
+    for key in sorted(value):
+        return value[key]
+    return None
+
+
+def _localized_asset_name(value: Any, locale: str) -> str | None:
+    selected = _localized_value(value, locale)
+    if isinstance(selected, dict):
+        selected = selected.get("name")
+    return selected if isinstance(selected, str) and selected else None
+
+
 def repository_base_url(index_url: str) -> str:
     parsed = urlparse(index_url)
     path = parsed.path if parsed.path.endswith("/") else parsed.path.rsplit("/", 1)[0] + "/"
@@ -329,6 +387,52 @@ def _join_repository_file(repository_url: str, filename: str) -> str:
     if filename.startswith("//"):
         raise ScanError(f"refusing network-path APK URL: {filename}")
     return urljoin(repository_url.rstrip("/") + "/", filename.lstrip("/"))
+
+
+def metadata_snapshot(
+    record: dict[str, Any], index_url: str, locale: str = DEFAULT_METADATA_LOCALE
+) -> dict[str, Any]:
+    """Return bounded public metadata from one verified F-Droid index record."""
+
+    metadata = record.get("metadata", record)
+    if not isinstance(metadata, dict):
+        return {"locale": locale}
+    snapshot: dict[str, Any] = {"locale": locale}
+    for source_key, public_key, limit in (
+        ("name", "display_name", MAX_METADATA_NAME),
+        ("summary", "summary", MAX_METADATA_SUMMARY),
+        ("description", "description", MAX_METADATA_DESCRIPTION),
+    ):
+        value = _plain_text(_localized_value(metadata.get(source_key), locale), limit)
+        if value:
+            snapshot[public_key] = value
+    categories = metadata.get("categories")
+    if isinstance(categories, list):
+        snapshot["categories"] = [
+            item.strip()[:80]
+            for item in categories[:MAX_METADATA_CATEGORIES]
+            if isinstance(item, str) and item.strip()
+        ]
+    license_name = metadata.get("license")
+    if isinstance(license_name, str) and license_name.strip():
+        snapshot["license"] = license_name.strip()[:120]
+
+    base_url = repository_base_url(index_url)
+    for source_key, public_key in (("icon", "icon_url"), ("featureGraphic", "feature_graphic_url")):
+        asset_name = _localized_asset_name(metadata.get(source_key), locale)
+        if asset_name:
+            snapshot[public_key] = _join_repository_file(base_url, asset_name)
+
+    screenshots = metadata.get("screenshots")
+    phone_screenshots = screenshots.get("phone") if isinstance(screenshots, dict) else None
+    selected_screenshots = _localized_value(phone_screenshots, locale)
+    if isinstance(selected_screenshots, list):
+        snapshot["screenshot_urls"] = [
+            _join_repository_file(base_url, item["name"])
+            for item in selected_screenshots[:MAX_METADATA_SCREENSHOTS]
+            if isinstance(item, dict) and isinstance(item.get("name"), str)
+        ]
+    return snapshot
 
 
 def apk_url(index_url: str, version: dict[str, Any]) -> tuple[str, int | None, str | None]:
@@ -570,6 +674,7 @@ def scan(args: argparse.Namespace) -> dict[str, Any]:
                 "response_etag": response_headers.get("ETag"),
                 "download_url": url,
             },
+            "metadata": metadata_snapshot(record, args.index_url),
             "upstream_urls": metadata_urls(record),
             "manifest_findings": findings,
             "aapt2": {"status": aapt_status, "exit_code": aapt_exit},
