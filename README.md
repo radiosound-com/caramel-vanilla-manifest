@@ -95,6 +95,15 @@ this is still much faster than streaming the 229-GB userdata region from the
 image. Use the full-image flasher when repartitioning or establishing a truly
 fresh disk layout.
 
+For a boot-only fix, such as changing the Pi EEPROM/PCIe prerequisite or boot
+firmware configuration, `scripts/update-rpi5-boot-partition.sh` validates and
+writes only the 128-MiB boot partition:
+
+```sh
+./caramel-vanilla-manifest/scripts/update-rpi5-boot-partition.sh \
+  artifacts/rpi5-usb-nvme-waveshare-20260806-6653cdd-boot.img /dev/diskN
+```
+
 To build the Android 16 generic automotive AVD, prepare the upstream generic-car
 artifact-path compatibility and select the arm64 car product:
 
