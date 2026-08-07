@@ -29,6 +29,10 @@
   <remove-project name="platform/packages/apps/Car/Settings" />
   <project path="packages/apps/Car/Settings" name="radiosound-com/android_packages_apps_Car_Settings" remote="github" revision="android-16.0" />
 
+  <!-- Framework stub delegates generic install-source requests to Car Settings. -->
+  <remove-project name="platform/packages/services/Car" />
+  <project path="packages/services/Car" name="radiosound-com/android_packages_services_Car" remote="github" revision="android-16.0" />
+
   <!-- USB NMEA GNSS AIDL HAL, consumed directly from Mark777a's Apache-2.0 repository. -->
   <project path="external/mark777a/AOSP-AIDL-v6-GNSS-HAL" name="mark777a/AOSP-AIDL-v6-GNSS-HAL" remote="github" revision="main" />
 
