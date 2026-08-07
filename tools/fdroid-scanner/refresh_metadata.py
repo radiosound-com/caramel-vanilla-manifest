@@ -113,7 +113,9 @@ def main(argv: list[str] | None = None) -> int:
     bundle_path = Path(args.bundle)
     try:
         with exclusive_lock(cache_dir / "scanner.lock"):
-            bundle = read_json(bundle_path)
+            bundle = read_json(bundle_path, None)
+            if not isinstance(bundle, dict):
+                raise ScanError(f"bundle is missing or is not a JSON object: {bundle_path}")
             budget = DailyBudget(cache_dir / "budget.json", args.daily_byte_budget)
             limiter = HostRateLimiter(args.host_interval)
             index, index_state = fetch_index(
