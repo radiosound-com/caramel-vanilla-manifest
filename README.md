@@ -116,8 +116,30 @@ m emu_img_zip
 ```
 
 The AVD output is `out/target/product/emulator_car64_arm64`; `emu_img_zip`
-also creates the portable system-image archive. The x86_64 product can be
-selected instead with `lunch sdk_car_x86_64-trunk_staging-userdebug`.
+also creates the portable system-image archive. The archive contains the
+QEMU-oriented system and vendor disks, so launch it by extracting the archive
+and supplying its system directory and kernel explicitly. The emulator uses
+`arm64` for `-avd-arch` (not the package directory name `arm64-v8a`):
+
+```sh
+unzip -q out/target/product/emulator_car64_arm64/sdk-repo-linux-system-images.zip \
+  -d "$HOME/.cache/caramel-vanilla/android-16-arm64"
+cp out/target/product/emulator_car64_arm64/userdata.img \
+  "$HOME/.cache/caramel-vanilla/android-16-arm64/userdata.img"
+emulator -avd caramel-vanilla-aaos \
+  -sysdir "$HOME/.cache/caramel-vanilla/android-16-arm64/arm64-v8a" \
+  -kernel "$HOME/.cache/caramel-vanilla/android-16-arm64/arm64-v8a/kernel-ranchu" \
+  -data "$HOME/.cache/caramel-vanilla/android-16-arm64/userdata.img" \
+  -avd-arch arm64 -no-snapshot
+```
+
+On Apple Silicon, verify `sys.boot_completed`, `ro.product.name`,
+`dumpsys car_service`, and the absence of CarService and car-power-policy
+crash loops. If a generated CarService class is present in the build tree but
+missing from the APK, remove only the target's Soong intermediates and rebuild
+that target before rebuilding `systemimage`, `vendorimage`, and `emu_img_zip`;
+an incremental package can otherwise preserve a stale APK. The x86_64 product
+can be selected instead with `lunch sdk_car_x86_64-trunk_staging-userdebug`.
 
 The build includes the Caramel Vanilla OsmAnd Automotive prebuilt. Git LFS is
 used because the APK is larger than GitHub's regular-file limit; `checkout.sh`
