@@ -6,7 +6,9 @@
 # not inherit Raspberry Pi board, boot, audio, display, or storage settings.
 
 CARAMEL_VOICE_ASR_MODEL := zipformer-int8
-CARAMEL_VOICE_TTS := espeak
+# Keep eSpeak as the compact default. The Kokoro AVD flavor sets this before
+# inheriting the product and gets the same hardware/image boundary.
+CARAMEL_VOICE_TTS ?= espeak
 
 $(call inherit-product, device/generic/car/sdk_car_arm64.mk)
 

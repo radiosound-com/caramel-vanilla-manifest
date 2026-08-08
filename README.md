@@ -164,6 +164,20 @@ lunch caramel_car_arm64-trunk_staging-userdebug
 m emu_img_zip -j"$(nproc)"
 ```
 
+The natural-speech Kokoro flavor uses the same Automotive hardware and image
+boundary while installing the optional offline Kokoro TTS engine. Build it
+with:
+
+```sh
+source build/envsetup.sh
+lunch caramel_car_arm64_kokoro-trunk_staging-userdebug
+m emu_img_zip -j"$(nproc)"
+```
+
+The compact `caramel_car_arm64` flavor remains the eSpeak default. Kokoro is
+heavier at runtime, so validate its memory and audio behavior separately
+before selecting it for a 4 GB physical Pi.
+
 The tested image is `out/target/product/emulator_car64_arm64/sdk-repo-linux-system-images.zip`.
 Extract it and pass the architecture directory (`arm64-v8a`) as `-sysdir`; the
 archive parent directory is not itself an emulator system-image directory. An

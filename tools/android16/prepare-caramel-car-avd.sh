@@ -48,6 +48,8 @@ mkdir -p \
 
 cp "${template_root}/Android.bp" "${product_root}/Android.bp"
 cp "${template_root}/caramel_car_arm64.mk" "${product_root}/caramel_car_arm64.mk"
+cp "${template_root}/caramel_car_arm64_kokoro.mk" \
+    "${product_root}/caramel_car_arm64_kokoro.mk"
 cp "${template_root}/overlay/CaramelCarFrameworkOverlay/Android.bp" \
     "${product_root}/overlay/CaramelCarFrameworkOverlay/Android.bp"
 cp "${template_root}/overlay/CaramelCarFrameworkOverlay/AndroidManifest.xml" \
@@ -79,6 +81,16 @@ fi
 grep -Fq '$(LOCAL_DIR)/caramel-avd/caramel_car_arm64.mk' "${products_file}"
 grep -Fq 'caramel_car_arm64-trunk_staging-userdebug' "${products_file}"
 
+if ! grep -Fq '$(LOCAL_DIR)/caramel-avd/caramel_car_arm64_kokoro.mk' "${products_file}"; then
+    sed -i '/caramel-avd\/caramel_car_arm64.mk \\/a\    $(LOCAL_DIR)/caramel-avd/caramel_car_arm64_kokoro.mk \\' "${products_file}"
+fi
+if ! grep -Fq 'caramel_car_arm64_kokoro-trunk_staging-userdebug' "${products_file}"; then
+    sed -i '/caramel_car_arm64-trunk_staging-userdebug \\/a\    caramel_car_arm64_kokoro-trunk_staging-userdebug \\' "${products_file}"
+fi
+grep -Fq '$(LOCAL_DIR)/caramel-avd/caramel_car_arm64_kokoro.mk' "${products_file}"
+grep -Fq 'caramel_car_arm64_kokoro-trunk_staging-userdebug' "${products_file}"
+
 echo "Caramel Android 16 arm64 Automotive AVD product is prepared"
 echo "  lunch caramel_car_arm64-trunk_staging-userdebug"
+echo "  lunch caramel_car_arm64_kokoro-trunk_staging-userdebug"
 echo "  m emu_img_zip"
