@@ -64,6 +64,12 @@ def inspected(name="org.example.app", automotive=True):
 
 
 class ImporterTests(unittest.TestCase):
+    def test_rejects_incomplete_metadata_before_publish(self):
+        value = bundle(inspected())
+        value["packages"][0]["metadata"] = {}
+        with self.assertRaisesRegex(ValueError, r"metadata\.display_name is required"):
+            validate_bundle(value)
+
     def test_validation_and_filtered_index(self):
         value = bundle(inspected(), inspected("org.example.other", False))
         validate_bundle(value)

@@ -59,9 +59,13 @@ def require_https(value: Any, field: str) -> str:
 
 def validate_metadata(value: Any, package_name: str) -> dict[str, Any]:
     if value is None:
-        return {}
+        raise ImportError(f"{package_name}.metadata is required")
     if not isinstance(value, dict):
         raise ImportError(f"{package_name}.metadata must be an object")
+    for key in ("display_name", "summary", "icon_url"):
+        item = value.get(key)
+        if not isinstance(item, str) or not item.strip():
+            raise ImportError(f"{package_name}.metadata.{key} is required")
     allowed = {
         "locale",
         "display_name",
