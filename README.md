@@ -192,16 +192,21 @@ Android Emulator 36.6.2's VirtIO capture backend rejects the generic car HAL's
 `AudioRecord` capture without changing the Pi products. With `-allow-host-audio`,
 both `MIC` and `VOICE_RECOGNITION` opened successfully on the Apple Silicon AVD,
 and a generated spoken `what time is it` replay was recognized by Zipformer and
-answered through TTS. This validates the AVD host-audio path, not a physical USB
-microphone or ALSA route on the Pi.
+answered through TTS. The assistant's cold-start session showed
+`Preparing microphone…` until the model was ready, then captured the utterance;
+the assistant, TTS choice, role, and CarService all survived a reboot from fresh
+userdata. This validates the AVD host-audio path, not a physical USB microphone
+or ALSA route on the Pi.
 
 The product default receiver is packaged at
 `/product/priv-app/CaramelVoiceDefaults` and selects
 `com.reecedunn.espeak` for user 10 when no user choice exists. This makes the
 TTS setting reproducible from fresh userdata and preserves it across reboot;
 the setting was observed both immediately after the clean boot and after a
-reboot. The current verified archive SHA-256 is
-`613441f0c4faa0201ca768afd50aa72fe4a2149aff6be84ccfcfe9b50a15c10d`.
+reboot. The current verified archive is published in the
+[Caramel Android 16 arm64 Automotive AVD release](https://github.com/radiosound-com/caramel-vanilla-manifest/releases/tag/avd-2026-08-08-v5)
+with SHA-256
+`b88c56c4f262657fc6ff9164dc81751264c39fbf2da1e0f53987102d4bf90026`.
 
 The build includes the Caramel Vanilla OsmAnd Automotive prebuilt. Git LFS is
 used because the APK is larger than GitHub's regular-file limit; `checkout.sh`
