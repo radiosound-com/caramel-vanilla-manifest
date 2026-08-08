@@ -121,6 +121,13 @@ QEMU-oriented system and vendor disks, so launch it by extracting the archive
 and supplying its system directory and kernel explicitly. The emulator uses
 `arm64` for `-avd-arch` (not the package directory name `arm64-v8a`):
 
+The preparation helper moves the emulator's system-internal CPPD setting to
+`system_ext` and the CarWatchdog settings to the product partition (vendor
+init cannot set those property types), and copies AOSP's Apache-2.0 sample
+power-policy XML into the vendor image. Use an Automotive AVD hardware profile
+when launching; a generic phone profile can boot-loop before the automotive
+services initialize.
+
 ```sh
 unzip -q out/target/product/emulator_car64_arm64/sdk-repo-linux-system-images.zip \
   -d "$HOME/.cache/caramel-vanilla/android-16-arm64"
