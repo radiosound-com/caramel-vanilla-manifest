@@ -200,8 +200,8 @@ The product default receiver is packaged at
 `com.reecedunn.espeak` for user 10 when no user choice exists. This makes the
 TTS setting reproducible from fresh userdata and preserves it across reboot;
 the setting was observed both immediately after the clean boot and after a
-reboot. The current verified archive SHA-256 was
-`2a30610d5a3c9400d558cb2856392dad82cb29707a3bc68881dddb55ee691b12`.
+reboot. The current verified archive SHA-256 is
+`613441f0c4faa0201ca768afd50aa72fe4a2149aff6be84ccfcfe9b50a15c10d`.
 
 The build includes the Caramel Vanilla OsmAnd Automotive prebuilt. Git LFS is
 used because the APK is larger than GitHub's regular-file limit; `checkout.sh`
