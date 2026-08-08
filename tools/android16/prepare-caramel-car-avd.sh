@@ -19,6 +19,19 @@ fi
 # Apply the generic car CPPD/watchdog/power-policy compatibility fix first.
 "${script_dir}/prepare-generic-car-avd.sh" "${source_root}"
 
+# The generic car emulator HAL requests PCM_MONOTONIC and an INT_MAX stop
+# threshold for capture, but the Android Emulator's VirtIO sound backend
+# rejects those input parameters.
+# Apply the narrow, source-preserved compatibility patch once; Pi products do
+# not inherit this HAL or this patch.
+caremu_audio_file=${source_root}/device/generic/car/emulator/audio/driver/audio_hw.c
+caremu_audio_patch=${script_dir}/caramel-avd/patches/0001-caremu-open-virtio-input-without-monotonic.patch
+if grep -Fq 'PCM_IN | PCM_MONOTONIC, &in->pcm_config' "$caremu_audio_file"; then
+    git -C "$source_root" apply --check "$caremu_audio_patch"
+    git -C "$source_root" apply "$caremu_audio_patch"
+fi
+grep -Fq 'PCM_IN, &in->pcm_config' "$caremu_audio_file"
+
 # Android's portable emulator-image makefile historically exposes emu_img_zip
 # only to sdk_* and gcar_* products. Keep the product's public name and add the
 # narrow Caramel prefix to that upstream packaging gate.

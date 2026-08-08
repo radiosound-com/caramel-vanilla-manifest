@@ -185,9 +185,15 @@ clean-image smoke test verified Android 16/API 36, product
 permission allowlist, the Caramel assistant role, both bundled recognition
 services, product-installed eSpeak, and Zipformer model startup. It also
 injected an AAOS `KEYCODE_VOICE_ASSIST` event and observed the bounded no-speech
-timeout followed by TTS binding. A real spoken-utterance test still requires a
-host/virtual capture source that the emulator exposes; the AVD result does not
-substitute for USB microphone and ALSA validation on the Pi.
+timeout followed by TTS binding. The preparation helper also applies
+`tools/android16/caramel-avd/patches/0001-caremu-open-virtio-input-without-monotonic.patch`.
+Android Emulator 36.6.2's VirtIO capture backend rejects the generic car HAL's
+`PCM_MONOTONIC`/`INT_MAX` input parameters; the narrow patch restores
+`AudioRecord` capture without changing the Pi products. With `-allow-host-audio`,
+both `MIC` and `VOICE_RECOGNITION` opened successfully on the Apple Silicon AVD,
+and a generated spoken `what time is it` replay was recognized by Zipformer and
+answered through TTS. This validates the AVD host-audio path, not a physical USB
+microphone or ALSA route on the Pi.
 
 The product default receiver is packaged at
 `/product/priv-app/CaramelVoiceDefaults` and selects
