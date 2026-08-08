@@ -238,6 +238,17 @@ fallback. The Kokoro AVD variant was verified through generated speech,
 successful TTS completion, and reboot persistence; its higher memory use
 should still be validated on a physical 4 GB Pi before becoming the default.
 
+A follow-up [Caramel Android 16 arm64 Automotive AVD v7 release](https://github.com/radiosound-com/caramel-vanilla-manifest/releases/tag/avd-2026-08-08-v7)
+rebuilds the Kokoro image with the shared AVD templates-host product
+integration. Its asset is
+`sdk-repo-linux-system-images-caramel-kokoro.zip`, SHA-256
+`cec18e6b5ccf8cf2b40f8c63f13546db7a7b0033dc232846c16e4bdbc3c958d7`.
+From clean userdata on Apple Silicon, the image booted as
+`caramel_car_arm64_kokoro`, registered
+`com.android.car.libraries.templates.host/.TemplatesHostService`, and
+launched OsmAnd's Automotive map and navigation templates without the
+`No handlers found` or `Please contact car services` fallback.
+
 The build includes the Caramel Vanilla OsmAnd Automotive prebuilt. Git LFS is
 used because the APK is larger than GitHub's regular-file limit; `checkout.sh`
 hydrates it after `repo sync`.
