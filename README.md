@@ -204,9 +204,16 @@ The product default receiver is packaged at
 TTS setting reproducible from fresh userdata and preserves it across reboot;
 the setting was observed both immediately after the clean boot and after a
 reboot. The current verified archive is published in the
-[Caramel Android 16 arm64 Automotive AVD release](https://github.com/radiosound-com/caramel-vanilla-manifest/releases/tag/avd-2026-08-08-v5)
+[Caramel Android 16 arm64 Automotive AVD v6 release](https://github.com/radiosound-com/caramel-vanilla-manifest/releases/tag/avd-2026-08-08-v6)
 with SHA-256
-`b88c56c4f262657fc6ff9164dc81751264c39fbf2da1e0f53987102d4bf90026`.
+`2b2d2fe39db75111c0edc8eb49ffebb1797411d5fa5acc3eeed8c986573dc5ec`.
+
+This v6 archive was built on the littleboy Linux AOSP host from the synced
+Caramel Android 16 checkout, including voice commit `667dee0` and the split
+OsmAnd/templates-host packaging fix. It was booted from clean userdata on
+Apple Silicon with the Automotive profile and host-audio support, then
+verified through reboot, Zipformer recognition, offline eSpeak TTS, generic
+MediaStore context refresh, canonical media dispatch, and OsmAnd navigation.
 
 The build includes the Caramel Vanilla OsmAnd Automotive prebuilt. Git LFS is
 used because the APK is larger than GitHub's regular-file limit; `checkout.sh`
