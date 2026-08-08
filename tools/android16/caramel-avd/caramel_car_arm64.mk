@@ -16,12 +16,14 @@ PRODUCT_SOONG_NAMESPACES += \
     device/generic/car/caramel-avd \
     vendor/radiosound/voiceassistant \
     vendor/radiosound/osmand \
+    vendor/radiosound/templates-host \
     vendor/radiosound/aurora-store \
     vendor/radiosound/caramelstore \
     device/brcm/rpi5
 
 $(call inherit-product, vendor/radiosound/voiceassistant/caramel_voice.mk)
 $(call inherit-product, vendor/radiosound/osmand/caramel_vanilla_osmand.mk)
+$(call inherit-product, vendor/radiosound/templates-host/caramel_vanilla_templates_host.mk)
 $(call inherit-product, vendor/radiosound/aurora-store/caramel_vanilla_aurora_store.mk)
 $(call inherit-product, vendor/radiosound/caramelstore/caramel_store.mk)
 
