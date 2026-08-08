@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright 2026 Radio Sound, Inc.
+     Licensed under the Apache License, Version 2.0.
+-->
+<permissions>
+    <privapp-permissions package="com.radiosound.caramelvoice">
+        <permission name="android.permission.MEDIA_CONTENT_CONTROL" />
+    </privapp-permissions>
+    <privapp-permissions package="com.radiosound.caramelvoicedefaults">
+        <permission name="android.permission.MANAGE_APP_OPS_MODES" />
+        <permission name="android.permission.WRITE_SECURE_SETTINGS" />
+    </privapp-permissions>
+    <!--
+         The Automotive templates host is a platform-signed privileged
+         renderer. Android 16 enforces this allowlist before system_server
+         reaches boot_completed.
+    -->
+    <privapp-permissions package="com.android.car.libraries.templates.host">
+        <permission name="android.car.permission.TEMPLATE_RENDERER" />
+        <permission name="android.car.permission.CAR_NAVIGATION_MANAGER" />
+        <permission name="android.car.permission.CAR_DISPLAY_IN_CLUSTER" />
+    </privapp-permissions>
+</permissions>

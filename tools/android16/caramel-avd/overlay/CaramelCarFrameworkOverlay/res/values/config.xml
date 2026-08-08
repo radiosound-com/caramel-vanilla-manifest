@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Radio Sound, Inc. Licensed under the Apache License, Version 2.0. -->
+<resources>
+    <string name="config_defaultAssistant" translatable="false">com.radiosound.caramelvoice</string>
+    <string name="config_systemSpeechRecognizer" translatable="false">com.radiosound.caramelvoice</string>
+    <string name="config_defaultOnDeviceSpeechRecognitionService" translatable="false">com.radiosound.caramelvoice/.SherpaRecognitionService</string>
+</resources>

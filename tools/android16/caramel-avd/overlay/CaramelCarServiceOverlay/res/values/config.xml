@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Radio Sound, Inc. Licensed under the Apache License, Version 2.0. -->
+<resources>
+    <!-- The portable product has no hardware-specific initial notice UI. -->
+    <string name="config_userNoticeUiService" translatable="false"></string>
+</resources>

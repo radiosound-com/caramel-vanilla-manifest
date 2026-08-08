@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright 2026 Radio Sound, Inc.
+     Licensed under the Apache License, Version 2.0.
+
+     The assistant remains subject to Android's user-controllable dangerous
+     permission model; these are initial grants for the preinstalled product
+     assistant on the active Automotive user.
+-->
+<exceptions>
+    <exception package="com.radiosound.caramelvoice">
+        <permission name="android.permission.RECORD_AUDIO" fixed="false" />
+        <permission name="android.permission.READ_MEDIA_AUDIO" fixed="false" />
+    </exception>
+</exceptions>

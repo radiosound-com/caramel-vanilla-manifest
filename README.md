@@ -148,6 +148,55 @@ that target before rebuilding `systemimage`, `vendorimage`, and `emu_img_zip`;
 an incremental package can otherwise preserve a stale APK. The x86_64 product
 can be selected instead with `lunch sdk_car_x86_64-trunk_staging-userdebug`.
 
+### Caramel Vanilla Android 16 arm64 Automotive AVD
+
+The manifest has a dedicated AVD product for testing the same Caramel voice,
+OsmAnd, templates-host, and store packaging without Raspberry Pi hardware. It
+is tracked in [issue #3](https://github.com/radiosound-com/caramel-vanilla-manifest/issues/3)
+and [issue #8](https://github.com/radiosound-com/caramel-vanilla-manifest/issues/8).
+Prepare the product in the AOSP checkout, then build its portable system-image
+archive:
+
+```sh
+../caramel-vanilla-manifest/tools/android16/prepare-caramel-car-avd.sh .
+source build/envsetup.sh
+lunch caramel_car_arm64-trunk_staging-userdebug
+m emu_img_zip -j"$(nproc)"
+```
+
+The tested image is `out/target/product/emulator_car64_arm64/sdk-repo-linux-system-images.zip`.
+Extract it and pass the architecture directory (`arm64-v8a`) as `-sysdir`; the
+archive parent directory is not itself an emulator system-image directory. An
+Apple Silicon launch using the existing Automotive hardware profile is:
+
+```sh
+unzip -q out/target/product/emulator_car64_arm64/sdk-repo-linux-system-images.zip \
+  -d "$HOME/.cache/caramel-vanilla/caramel-avd"
+emulator -avd automotive \
+  -sysdir "$HOME/.cache/caramel-vanilla/caramel-avd/arm64-v8a" \
+  -port 5566 -no-window -no-boot-anim -gpu swiftshader_indirect \
+  -no-snapshot -wipe-data -allow-host-audio
+```
+
+`-wipe-data` is the clean-userdata test; omit it for an ordinary reboot
+iteration. The current product is userdebug, so `adb root` is available. The
+clean-image smoke test verified Android 16/API 36, product
+`caramel_car_arm64`, active AAOS driver user 10, CarService, the templates-host
+permission allowlist, the Caramel assistant role, both bundled recognition
+services, product-installed eSpeak, and Zipformer model startup. It also
+injected an AAOS `KEYCODE_VOICE_ASSIST` event and observed the bounded no-speech
+timeout followed by TTS binding. A real spoken-utterance test still requires a
+host/virtual capture source that the emulator exposes; the AVD result does not
+substitute for USB microphone and ALSA validation on the Pi.
+
+The product default receiver is packaged at
+`/product/priv-app/CaramelVoiceDefaults` and selects
+`com.reecedunn.espeak` for user 10 when no user choice exists. This makes the
+TTS setting reproducible from fresh userdata and preserves it across reboot;
+the setting was observed both immediately after the clean boot and after a
+reboot. The current verified archive SHA-256 was
+`2a30610d5a3c9400d558cb2856392dad82cb29707a3bc68881dddb55ee691b12`.
+
 The build includes the Caramel Vanilla OsmAnd Automotive prebuilt. Git LFS is
 used because the APK is larger than GitHub's regular-file limit; `checkout.sh`
 hydrates it after `repo sync`.
@@ -176,6 +225,7 @@ integration, and the bounded F-Droid catalog scanner in
 * [Aurora Store product packaging](https://github.com/radiosound-com/android_vendor_aurora_store)
 * [Car Settings install-source integration](https://github.com/radiosound-com/android_packages_apps_Car_Settings/tree/android-16.0)
 * [Caramel Vanilla templates host](https://github.com/radiosound-com/android_packages_apps_Car_TemplatesHost)
+* [Caramel Vanilla offline voice assistant and TTS](https://github.com/radiosound-com/android_packages_apps_Caramel_Voice)
 * [OsmAnd AAOS fork](https://github.com/radiosound-com/OsmAnd/tree/caramel-vanilla-osmand-aaos)
 * [Mark777a AIDL v6 GNSS HAL](https://github.com/mark777a/AOSP-AIDL-v6-GNSS-HAL)
 
