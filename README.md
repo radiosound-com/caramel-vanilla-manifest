@@ -229,6 +229,15 @@ Apple Silicon with the Automotive profile and host-audio support, then
 verified through reboot, Zipformer recognition, offline eSpeak TTS, generic
 MediaStore context refresh, canonical media dispatch, and OsmAnd navigation.
 
+The same release also contains the optional natural-speech Kokoro variant:
+`sdk-repo-linux-system-images-caramel-kokoro.zip`, SHA-256
+`c1a27e5a3a16b6d8ef68dda2809720b3c9be719fa2c02eea6db92a389fcef578`.
+It boots as `caramel_car_arm64_kokoro`, selects
+`com.k2fsa.sherpa.onnx.tts.engine` by default, and retains eSpeak as a
+fallback. The Kokoro AVD variant was verified through generated speech,
+successful TTS completion, and reboot persistence; its higher memory use
+should still be validated on a physical 4 GB Pi before becoming the default.
+
 The build includes the Caramel Vanilla OsmAnd Automotive prebuilt. Git LFS is
 used because the APK is larger than GitHub's regular-file limit; `checkout.sh`
 hydrates it after `repo sync`.
