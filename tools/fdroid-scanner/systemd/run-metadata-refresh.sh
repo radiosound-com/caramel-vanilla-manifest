@@ -13,19 +13,24 @@ index_url="${CARAMEL_SCANNER_INDEX_URL:-https://f-droid.org/repo/index-v2.json}"
 signing_key="${CARAMEL_SCANNER_SIGNING_KEY:-/etc/caramel-store/catalog-signing-key.pem}"
 token_file="${CARAMEL_SCANNER_TOKEN_FILE:-/etc/caramel-store/import-token}"
 upload_url="${CARAMEL_SCANNER_UPLOAD_URL:-https://caramel-vanilla-store.apps.radiosound.com/v1/import}"
+source_bundle_override="${CARAMEL_SCANNER_SOURCE_BUNDLE:-}"
 
-latest_bundle="$(
-    find "$bundle_dir" -maxdepth 1 -type f \
-        -name 'catalog-import-*.json' \
-        ! -name 'catalog-metadata-refresh-*.json' \
-        -printf '%f\n' | sort | tail -n 1
-)"
-if [[ -z "$latest_bundle" ]]; then
-    echo "metadata refresh: no scanner bundle found in $bundle_dir" >&2
-    exit 2
+if [[ -n "$source_bundle_override" ]]; then
+    source_bundle="$source_bundle_override"
+else
+    latest_bundle="$(
+        find "$bundle_dir" -maxdepth 1 -type f \
+            -name 'catalog-import-*.json' \
+            ! -name 'catalog-metadata-refresh-*.json' \
+            -printf '%f\n' | sort | tail -n 1
+    )"
+    if [[ -z "$latest_bundle" ]]; then
+        echo "metadata refresh: no scanner bundle found in $bundle_dir" >&2
+        exit 2
+    fi
+    source_bundle="$bundle_dir/$latest_bundle"
 fi
 
-source_bundle="$bundle_dir/$latest_bundle"
 if [[ ! -s "$source_bundle" || ! -s "$source_bundle.sig" ]]; then
     echo "metadata refresh: latest scanner bundle is incomplete" >&2
     exit 2

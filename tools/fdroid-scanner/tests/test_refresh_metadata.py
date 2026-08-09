@@ -94,6 +94,32 @@ class MetadataRefreshTests(unittest.TestCase):
                 0,
             )
 
+    def test_refresh_falls_back_to_display_name_when_summary_is_missing(self):
+        bundle = self._bundle()
+        index = {
+            "packages": {
+                "org.example.app": {
+                    "metadata": {
+                        "name": {"en-US": "Example App"},
+                    }
+                }
+            }
+        }
+        refreshed = refresh_bundle(
+            bundle,
+            index,
+            {"sha256": "c" * 64},
+            "https://f-droid.org/repo/index-v2.json",
+            "en-US",
+            42,
+        )
+        self.assertEqual(
+            "Example App", refreshed["packages"][0]["metadata"]["display_name"]
+        )
+        self.assertEqual(
+            "Example App", refreshed["packages"][0]["metadata"]["summary"]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

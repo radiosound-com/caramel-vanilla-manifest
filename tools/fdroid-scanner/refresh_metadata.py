@@ -73,7 +73,12 @@ def refresh_bundle(
         record = records.get(package_name)
         if record is None:
             raise ScanError(f"selected package is missing from the current F-Droid index: {package_name}")
-        package["metadata"] = metadata_snapshot(record, index_url, metadata_locale)
+        metadata = metadata_snapshot(record, index_url, metadata_locale)
+        if not metadata.get("display_name"):
+            metadata["display_name"] = package_name
+        if not metadata.get("summary"):
+            metadata["summary"] = metadata["display_name"]
+        package["metadata"] = metadata
         provenance = package.setdefault("provenance", {})
         if isinstance(provenance, dict):
             provenance["index_url"] = index_url

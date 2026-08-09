@@ -406,6 +406,12 @@ def metadata_snapshot(
         value = _plain_text(_localized_value(metadata.get(source_key), locale), limit)
         if value:
             snapshot[public_key] = value
+    if "display_name" not in snapshot:
+        package_name = record.get("packageName")
+        if isinstance(package_name, str) and package_name.strip():
+            snapshot["display_name"] = package_name.strip()[:MAX_METADATA_NAME]
+    if "summary" not in snapshot and "display_name" in snapshot:
+        snapshot["summary"] = snapshot["display_name"]
     categories = metadata.get("categories")
     if isinstance(categories, list):
         snapshot["categories"] = [
@@ -749,7 +755,14 @@ def upload_bundle(args: argparse.Namespace, bundle_path: Path, signature_path: P
         with build_opener().open(request, timeout=60) as response:
             if response.status < 200 or response.status >= 300:
                 raise ScanError(f"catalog import endpoint returned HTTP {response.status}")
-    except (HTTPError, URLError) as error:
+    except HTTPError as error:
+        detail = f"HTTP {error.code} {error.reason}"
+        with contextlib.suppress(OSError, UnicodeDecodeError):
+            body = error.read(4096).decode("utf-8", errors="replace").strip()
+            if body:
+                detail += f": {body[:500]}"
+        raise ScanError(f"catalog import upload failed: {detail}") from error
+    except URLError as error:
         raise ScanError(f"catalog import upload failed: {error}") from error
 
 
