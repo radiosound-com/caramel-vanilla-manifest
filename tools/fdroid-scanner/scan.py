@@ -349,6 +349,23 @@ def _plain_text(value: Any, limit: int) -> str | None:
     return result[:limit].rstrip() or None
 
 
+def _last_updated(value: Any) -> str | None:
+    """Convert F-Droid's epoch-millisecond update marker to RFC 3339."""
+
+    if isinstance(value, bool):
+        return None
+    try:
+        timestamp = float(value)
+    except (TypeError, ValueError):
+        return None
+    if timestamp > 10_000_000_000:
+        timestamp /= 1000.0
+    try:
+        return dt.datetime.fromtimestamp(timestamp, dt.timezone.utc).replace(microsecond=0).isoformat()
+    except (OverflowError, OSError, ValueError):
+        return None
+
+
 def _localized_value(value: Any, locale: str) -> Any:
     if not isinstance(value, dict):
         return value
@@ -412,6 +429,9 @@ def metadata_snapshot(
             snapshot["display_name"] = package_name.strip()[:MAX_METADATA_NAME]
     if "summary" not in snapshot and "display_name" in snapshot:
         snapshot["summary"] = snapshot["display_name"]
+    last_updated = _last_updated(metadata.get("lastUpdated"))
+    if last_updated:
+        snapshot["last_updated"] = last_updated
     categories = metadata.get("categories")
     if isinstance(categories, list):
         snapshot["categories"] = [

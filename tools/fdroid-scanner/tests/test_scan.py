@@ -157,6 +157,7 @@ class ScannerTests(unittest.TestCase):
                 "description": {"en-US": "<p>Find places.</p><ul><li>Offline</li></ul>"},
                 "categories": ["Navigation"],
                 "license": "Apache-2.0",
+                "lastUpdated": 1_754_640_000_000,
                 "icon": {"en-US": {"name": "/org.example/en-US/icon.png"}},
                 "featureGraphic": {"en-US": {"name": "/org.example/en-US/feature.jpg"}},
                 "screenshots": {
@@ -175,6 +176,7 @@ class ScannerTests(unittest.TestCase):
                 "description": "Find places.\n\nOffline",
                 "categories": ["Navigation"],
                 "license": "Apache-2.0",
+                "last_updated": "2025-08-08T08:00:00+00:00",
                 "icon_url": "https://f-droid.org/repo/org.example/en-US/icon.png",
                 "feature_graphic_url": "https://f-droid.org/repo/org.example/en-US/feature.jpg",
                 "screenshot_urls": [
