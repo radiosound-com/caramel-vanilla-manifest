@@ -29,6 +29,13 @@
   <remove-project name="platform/packages/apps/Car/Settings" />
   <project path="packages/apps/Car/Settings" name="radiosound-com/android_packages_apps_Car_Settings" remote="github" revision="android-16.0" />
 
+  <!-- Car Launcher launches declared full-screen activities like AppGrid and preserves active car-app tasks. -->
+  <remove-project name="platform/packages/apps/Car/Launcher" />
+  <project path="packages/apps/Car/Launcher"
+           name="radiosound-com/android_packages_apps_Car_Launcher"
+           remote="github"
+           revision="radiosound/caramel-dock-launcher" />
+
   <!-- Framework stub delegates generic install-source requests to Car Settings. -->
   <remove-project name="platform/packages/services/Car" />
   <project path="packages/services/Car" name="radiosound-com/android_packages_services_Car" remote="github" revision="android-16.0" />
