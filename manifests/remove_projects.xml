@@ -25,4 +25,12 @@
   <remove-project name="platform/prebuilts/go/darwin-x86" />
   <!-- The Android 17 Mobly test snapshot references an unavailable PASIT-defaults module. -->
   <remove-project name="platform/platform_testing" />
+  <!-- These test/tooling snapshots are outside the Raspberry Pi product build. -->
+  <remove-project name="platform/cts" />
+  <remove-project name="platform/frameworks/libs/systemui" />
+  <remove-project name="platform/packages/modules/AdServices" />
+  <remove-project name="platform/packages/modules/Virtualization" />
+  <remove-project name="platform/system/secretkeeper" />
+  <remove-project name="platform/tools/loganalysis" />
+  <remove-project name="platform/tools/tradefederation" />
 </manifest>
