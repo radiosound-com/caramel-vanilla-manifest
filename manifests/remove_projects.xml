@@ -26,6 +26,5 @@
   <!-- These test/tooling snapshots are outside the Raspberry Pi product build. -->
   <remove-project name="platform/frameworks/libs/systemui" />
   <remove-project name="platform/packages/modules/AdServices" />
-  <remove-project name="platform/system/secretkeeper" />
   <remove-project name="platform/tools/loganalysis" />
 </manifest>
