@@ -29,7 +29,6 @@
   <remove-project name="platform/cts" />
   <remove-project name="platform/frameworks/libs/systemui" />
   <remove-project name="platform/packages/modules/AdServices" />
-  <remove-project name="platform/packages/modules/Virtualization" />
   <remove-project name="platform/system/secretkeeper" />
   <remove-project name="platform/tools/loganalysis" />
   <remove-project name="platform/tools/tradefederation" />
