@@ -33,4 +33,5 @@
   <remove-project name="platform/system/secretkeeper" />
   <remove-project name="platform/tools/loganalysis" />
   <remove-project name="platform/tools/tradefederation" />
+  <remove-project name="platform/tools/tradefederation/prebuilts" />
 </manifest>
