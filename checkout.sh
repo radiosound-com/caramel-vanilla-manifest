@@ -15,17 +15,15 @@ if ! command -v git-lfs >/dev/null 2>&1; then
 fi
 
 manifest_root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-android_root=${1:-"$manifest_root/../caramel-vanilla-android-16"}
+android_root=${1:-"$manifest_root/../caramel-vanilla-android-17"}
 android_root=$(mkdir -p "$android_root" && cd "$android_root" && pwd)
 
-if [ ! -d "$android_root/.repo" ]; then
-  (
-    cd "$android_root"
-    repo init -u https://android.googlesource.com/platform/manifest \
-      -b android-16.0.0_r4 --depth=1 --quiet \
-      --repo-url=https://gerrit.googlesource.com/git-repo
-  )
-fi
+(
+  cd "$android_root"
+  repo init -u https://android.googlesource.com/platform/manifest \
+    -b android-17.0.0_r1 --depth=1 --quiet \
+    --repo-url=https://gerrit.googlesource.com/git-repo
+)
 
 mkdir -p "$android_root/.repo/local_manifests"
 cp "$manifest_root/manifests/manifest_brcm_rpi.xml" \

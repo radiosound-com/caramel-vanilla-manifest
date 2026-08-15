@@ -1,7 +1,7 @@
 # Caramel Vanilla manifest
 
 This repository bootstraps the Caramel Vanilla Raspberry Pi 5 Android Automotive
-checkout. It follows Raspberry Vanilla Android 16 and pins the Caramel Vanilla
+checkout. It follows Raspberry Vanilla Android 17 and pins the Caramel Vanilla
 compatibility fixes to the radiosound-com forks.
 
 Copyright 2026 Radio Sound, Inc. The original checkout tooling and manifest
@@ -40,13 +40,13 @@ git clone https://github.com/radiosound-com/caramel-vanilla-manifest.git \
   && ./checkout.sh
 ```
 
-The checkout is created at `../caramel-vanilla-android-16` by default. Pass a
+The checkout is created at `../caramel-vanilla-android-17` by default. Pass a
 different destination as the first argument to `checkout.sh`.
 
 ## Build the Raspberry Pi 5 image
 
 ```sh
-cd ../caramel-vanilla-android-16
+cd ../caramel-vanilla-android-17
 source build/envsetup.sh
 lunch aosp_rpi5_car-trunk_staging-userdebug
 m bootimage systemimage vendorimage
@@ -262,7 +262,7 @@ repository.
 ## What it includes
 
 Caramel Vanilla is a GMS-free Android Automotive OS build for Raspberry Pi 5,
-based on Raspberry Vanilla Android 16. The product includes Raspberry Pi device
+based on Raspberry Vanilla Android 17. The product includes Raspberry Pi device
 integration, an AndroidX car templates host, OsmAnd Automotive maps with a
 separate full UI for parked tasks, Aurora Store packaging, Car Settings
 integration, and the bounded F-Droid catalog scanner in
@@ -275,7 +275,7 @@ integration, and the bounded F-Droid catalog scanner in
 * [OsmAnd product packaging](https://github.com/radiosound-com/android_vendor_osmand)
 * [Templates Host product packaging](https://github.com/radiosound-com/android_vendor_car_templates_host)
 * [Aurora Store product packaging](https://github.com/radiosound-com/android_vendor_aurora_store)
-* [Car Settings install-source integration](https://github.com/radiosound-com/android_packages_apps_Car_Settings/tree/android-16.0)
+* [Car Settings install-source integration](https://github.com/radiosound-com/android_packages_apps_Car_Settings/tree/android-17.0)
 * [Caramel Vanilla templates host](https://github.com/radiosound-com/android_packages_apps_Car_TemplatesHost)
 * [Caramel Vanilla offline voice assistant and TTS](https://github.com/radiosound-com/android_packages_apps_Caramel_Voice)
 * [OsmAnd AAOS fork](https://github.com/radiosound-com/OsmAnd/tree/caramel-vanilla-osmand-aaos)
