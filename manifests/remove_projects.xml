@@ -29,8 +29,5 @@
   <remove-project name="platform/frameworks/libs/systemui" />
   <remove-project name="platform/packages/modules/AdServices" />
   <remove-project name="platform/system/secretkeeper" />
-  <remove-project name="platform/test/suite_harness" />
   <remove-project name="platform/tools/loganalysis" />
-  <remove-project name="platform/tools/tradefederation" />
-  <remove-project name="platform/tools/tradefederation/prebuilts" />
 </manifest>
