@@ -28,7 +28,6 @@
   <remove-project name="platform/system/software_defined_vehicle/middleware" />
   <remove-project name="platform/system/software_defined_vehicle/tools" />
   <remove-project name="platform/system/software_defined_vehicle/vsidl" />
-  <remove-project name="platform/system/software_defined_vehicle/common" />
   <remove-project name="platform/system/software_defined_vehicle/automotive_services" />
   <remove-project name="platform/system/software_defined_vehicle/some_ip" />
   <remove-project name="platform/system/software_defined_vehicle/vpm" />
