@@ -30,7 +30,10 @@ cp "$manifest_root/manifests/manifest_brcm_rpi.xml" \
   "$manifest_root/manifests/remove_projects.xml" \
   "$android_root/.repo/local_manifests/"
 
-(cd "$android_root" && repo sync --current-branch --no-tags)
+# Android 17 places several product-build inputs (casefolding_remover,
+# libwrapfd, memory guardian, CarAppHost, and related host tooling) in the
+# PDK group. Include that group so a fresh checkout matches the build machine.
+(cd "$android_root" && repo sync --current-branch --no-tags --groups=default,pdk)
 
 # repo does not guarantee that LFS objects for a project are hydrated.
 for lfs_project in \
