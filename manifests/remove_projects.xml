@@ -27,6 +27,7 @@
   <remove-project name="platform/system/software_defined_vehicle/samples" />
   <remove-project name="platform/system/software_defined_vehicle/middleware" />
   <remove-project name="platform/system/software_defined_vehicle/tools" />
+  <remove-project name="platform/system/software_defined_vehicle/vsidl" />
   <!-- These test/tooling snapshots are outside the Raspberry Pi product build. -->
   <remove-project name="platform/tools/loganalysis" />
 </manifest>
