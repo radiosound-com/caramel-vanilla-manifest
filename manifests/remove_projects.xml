@@ -23,6 +23,7 @@
   <remove-project name="platform/hardware/ti/am57x" />
   <remove-project name="platform/prebuilts/clang/host/darwin-x86" />
   <remove-project name="platform/prebuilts/go/darwin-x86" />
+  <remove-project name="platform/system/software_defined_vehicle/sdv_gateway" />
   <!-- These test/tooling snapshots are outside the Raspberry Pi product build. -->
   <remove-project name="platform/tools/loganalysis" />
 </manifest>
