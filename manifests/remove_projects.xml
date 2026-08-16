@@ -24,6 +24,5 @@
   <remove-project name="platform/prebuilts/clang/host/darwin-x86" />
   <remove-project name="platform/prebuilts/go/darwin-x86" />
   <!-- These test/tooling snapshots are outside the Raspberry Pi product build. -->
-  <remove-project name="platform/frameworks/libs/systemui" />
   <remove-project name="platform/tools/loganalysis" />
 </manifest>
