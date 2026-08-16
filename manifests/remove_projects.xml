@@ -33,6 +33,7 @@
   <remove-project name="platform/system/software_defined_vehicle/some_ip" />
   <remove-project name="platform/system/software_defined_vehicle/vpm" />
   <remove-project name="platform/system/software_defined_vehicle/orchestration" />
+  <remove-project name="platform/system/software_defined_vehicle/health_monitor" />
   <!-- These test/tooling snapshots are outside the Raspberry Pi product build. -->
   <remove-project name="platform/tools/loganalysis" />
 </manifest>
