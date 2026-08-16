@@ -34,6 +34,11 @@
   <remove-project name="platform/system/software_defined_vehicle/orchestration" />
   <remove-project name="platform/system/software_defined_vehicle/health_monitor" />
   <remove-project name="platform/system/software_defined_vehicle/platform" />
+  <remove-project name="platform/system/software_defined_vehicle/common" />
+  <remove-project name="platform/system/software_defined_vehicle/lifecycle_management" />
+  <remove-project name="platform/system/software_defined_vehicle/service_bundles_registry" />
+  <remove-project name="platform/system/software_defined_vehicle/telemetry" />
+  <remove-project name="platform/system/software_defined_vehicle/update_manager" />
   <!-- These test/tooling snapshots are outside the Raspberry Pi product build. -->
   <remove-project name="platform/tools/loganalysis" />
 </manifest>
