@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Radio Sound, Inc. Licensed under the Apache License, Version 2.0. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.radiosound.caramel.avd.carservice">
+    <application android:hasCode="false" />
+    <overlay
+        android:targetPackage="com.android.car.updatable"
+        android:targetName="CarServiceCustomization"
+        android:isStatic="true"
+        android:priority="10" />
+</manifest>

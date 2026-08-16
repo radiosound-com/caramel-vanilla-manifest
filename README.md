@@ -150,6 +150,28 @@ can be selected instead with `lunch sdk_car_x86_64-trunk_staging-userdebug`.
 
 ### Caramel Vanilla Android 16 arm64 Automotive AVD
 
+### Caramel Vanilla Android 17 arm64 Automotive AVD
+
+The Android 17 checkout uses the same portable Automotive image boundary as
+Android 16, with a dedicated preparation helper under `tools/android17/`.
+From the Android 17 source tree, run:
+
+```sh
+../caramel-vanilla-manifest/tools/android17/prepare-caramel-car-avd.sh .
+source build/envsetup.sh
+lunch caramel_car_arm64-trunk_staging-userdebug
+m emu_img_zip -j"$(getconf _NPROCESSORS_ONLN)"
+```
+
+The output is
+`out/target/product/emulator_car64_arm64/sdk-repo-linux-system-images.zip`.
+Extract it on the Mac and launch it with the same Automotive hardware profile
+used for Android 16, passing the extracted `arm64-v8a` directory as `-sysdir`
+and its `kernel-ranchu` as `-kernel`. Validate API 36/Baklava, the
+`caramel_car_arm64` product, `sys.boot_completed`, CarService, the assistant,
+templates-host, OsmAnd, and offline eSpeak TTS before comparing it with the
+Android 16 v6 image.
+
 The manifest has a dedicated AVD product for testing the same Caramel voice,
 OsmAnd, templates-host, and store packaging without Raspberry Pi hardware. It
 is tracked in [issue #3](https://github.com/radiosound-com/caramel-vanilla-manifest/issues/3)

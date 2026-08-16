@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Radio Sound <opensource@radiosound.com>
+Date: Sat, 8 Aug 2026 04:35:00 -0400
+Subject: [PATCH] caremu: use VirtIO-compatible input parameters
+
+Copyright 2026 Radio Sound, Inc.
+Licensed under the Apache License 2.0.
+
+The Android 17 car emulator audio HAL opens its capture stream with
+PCM_MONOTONIC and an INT_MAX stop threshold. The VirtIO sound device exposed by
+the Android Emulator rejects those input parameters, so the input worker exits
+and every AudioRecord read is zero-filled. tinycap can capture from the same
+device with the default stop threshold and without the monotonic flag.
+
+This is an emulator-only compatibility patch. Raspberry Pi products do not
+inherit the caremu HAL or this source path.
+---
+ device/generic/car/emulator/audio/driver/audio_hw.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/device/generic/car/emulator/audio/driver/audio_hw.c b/device/generic/car/emulator/audio/driver/audio_hw.c
+index 0000000..0000000 100644
+--- a/device/generic/car/emulator/audio/driver/audio_hw.c
++++ b/device/generic/car/emulator/audio/driver/audio_hw.c
+@@ -237,4 +237,4 @@ static struct pcm_config pcm_config_in = {
+     .format = PCM_FORMAT_S16_LE,
+     .start_threshold = 0,
+-    .stop_threshold = INT_MAX,
++    .stop_threshold = 0,
+ };
+@@ -986,7 +986,7 @@ static void *in_read_worker(void *args) {
+         }
+         if (!pcm) {
+             pcm = pcm_open(PCM_CARD, PCM_DEVICE,
+-                    PCM_IN | PCM_MONOTONIC, &in->pcm_config);
++                    PCM_IN, &in->pcm_config);
+             if (!pcm_is_ready(pcm)) {
+                 ALOGE("pcm_open(in) failed: %s: channels %d format %d rate %d",
+                         pcm_get_error(pcm),
+--
+2.39.5
