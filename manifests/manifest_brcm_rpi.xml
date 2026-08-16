@@ -61,7 +61,7 @@
   <!-- Camera -->
   <remove-project name="platform/external/libcamera" />
   <project path="external/libcamera" name="radiosound-com/android_external_libcamera" remote="github" revision="android-17.0" />
-  <project path="external/libpisp" name="raspberry-vanilla/android_external_libpisp" remote="github" revision="android-17.0" />
+  <project path="external/libpisp" name="radiosound-com/android_external_libpisp" remote="github" revision="android-17.0" />
   <project path="external/libyuv_chromium" name="raspberry-vanilla/android_external_libyuv_chromium" remote="github" revision="android-17.0" />
 
   <!-- FFmpeg -->
