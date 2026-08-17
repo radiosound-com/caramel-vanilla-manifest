@@ -31,9 +31,8 @@
 
   <!-- Framework stub delegates generic install-source requests to Car Settings. -->
   <remove-project name="platform/packages/services/Car" />
-  <!-- The Android 17 Caramel fork is currently carried locally on littleboy at
-       commit 6bf8821526 until its upstream parent tree is available in the fork. -->
-  <project path="packages/services/Car" name="radiosound-com/android_packages_services_Car" remote="github" revision="6bf8821526db9cd58b24b2246074be8e4b5db123" />
+  <!-- Clean Android 17 snapshot published in the Caramel services fork. -->
+  <project path="packages/services/Car" name="radiosound-com/android_packages_services_Car" remote="github" revision="978ff1f578cfe3e26287a63a25770b0380bcffcd" />
 
   <!-- USB NMEA GNSS AIDL HAL, consumed directly from Mark777a's Apache-2.0 repository. -->
   <project path="external/mark777a/AOSP-AIDL-v6-GNSS-HAL" name="mark777a/AOSP-AIDL-v6-GNSS-HAL" remote="github" revision="main" />
