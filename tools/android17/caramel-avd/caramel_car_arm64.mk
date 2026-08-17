@@ -25,11 +25,6 @@ $(call inherit-product, vendor/radiosound/voiceassistant/caramel_voice.mk)
 $(call inherit-product, vendor/radiosound/osmand/caramel_vanilla_osmand.mk)
 $(call inherit-product, vendor/radiosound/templates-host/caramel_vanilla_templates_host.mk)
 
-# Android 17's generic car product and CarTemplatesHost.mk both expose the
-# AOSP CarAppHost.  The Caramel prebuilt above is the renderer we ship and is
-# the only templates host OsmAnd can bind to; retaining both hosts makes
-# CarAppActivity reject the Automotive system as ambiguous.  Android 16 does
-# not include CarAppHost in its generic product, so this removal is
 $(call inherit-product, vendor/radiosound/aurora-store/caramel_vanilla_aurora_store.mk)
 $(call inherit-product, vendor/radiosound/caramelstore/caramel_store.mk)
 
