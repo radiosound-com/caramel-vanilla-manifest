@@ -12,13 +12,6 @@ CARAMEL_VOICE_TTS ?= espeak
 
 $(call inherit-product, device/generic/car/sdk_car_arm64.mk)
 
-# Android 17's generic car product already includes the AOSP CarAppHost.  The
-# Caramel prebuilt below is the renderer we ship and is the only templates host
-# OsmAnd can bind to; retaining both hosts makes CarAppActivity reject the
-# Automotive system as ambiguous.  Android 16 does not include CarAppHost in
-# its generic product, so this removal is intentionally Android 17-specific.
-PRODUCT_PACKAGES -= CarAppHost
-
 PRODUCT_SOONG_NAMESPACES += \
     device/generic/car/caramel-avd \
     vendor/radiosound/voiceassistant \
@@ -31,6 +24,15 @@ PRODUCT_SOONG_NAMESPACES += \
 $(call inherit-product, vendor/radiosound/voiceassistant/caramel_voice.mk)
 $(call inherit-product, vendor/radiosound/osmand/caramel_vanilla_osmand.mk)
 $(call inherit-product, vendor/radiosound/templates-host/caramel_vanilla_templates_host.mk)
+
+# Android 17's generic car product and CarTemplatesHost.mk both expose the
+# AOSP CarAppHost.  The Caramel prebuilt above is the renderer we ship and is
+# the only templates host OsmAnd can bind to; retaining both hosts makes
+# CarAppActivity reject the Automotive system as ambiguous.  Android 16 does
+# not include CarAppHost in its generic product, so this removal is
+# intentionally Android 17-specific and must remain after the host fragment.
+PRODUCT_PACKAGES -= CarAppHost
+
 $(call inherit-product, vendor/radiosound/aurora-store/caramel_vanilla_aurora_store.mk)
 $(call inherit-product, vendor/radiosound/caramelstore/caramel_store.mk)
 
