@@ -32,6 +32,18 @@ if grep -Fq 'PCM_IN | PCM_MONOTONIC, &in->pcm_config' "$caremu_audio_file"; then
 fi
 grep -Fq 'PCM_IN, &in->pcm_config' "$caremu_audio_file"
 
+# Android 17's generic car product includes the stock CarAppHost.  Caramel
+# ships a compatible renderer prebuilt, and AndroidX CarAppActivity refuses to
+# select between both hosts.  Keep the stock host for other products while
+# applying the narrow exclusion only to this Caramel AVD source tree.
+car_host_file=${source_root}/packages/services/Car/car_product/build/car_system.mk
+car_host_patch=${script_dir}/caramel-avd/patches/0002-disable-stock-car-app-host-for-caramel.patch
+if grep -Fq '    CarAppHost \' "$car_host_file"; then
+    git -C "$source_root" apply --check "$car_host_patch"
+    git -C "$source_root" apply "$car_host_patch"
+fi
+grep -Fq '$(if $(filter caramel_car_arm64 caramel_car_arm64_kokoro,$(TARGET_PRODUCT)),,CarAppHost)' "$car_host_file"
+
 # Android's portable emulator-image makefile historically exposes emu_img_zip
 # only to sdk_* and gcar_* products. Keep the product's public name and add the
 # narrow Caramel prefix to that upstream packaging gate.

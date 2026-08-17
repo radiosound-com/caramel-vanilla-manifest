@@ -1,0 +1,12 @@
+diff --git a/packages/services/Car/car_product/build/car_system.mk b/packages/services/Car/car_product/build/car_system.mk
+--- a/packages/services/Car/car_product/build/car_system.mk
++++ b/packages/services/Car/car_product/build/car_system.mk
+@@ -227,7 +227,7 @@ PRODUCT_PACKAGES += \
+     car-frameworks-service \
+     com.android.car.procfsinspector \
+     com.android.permission \
+-    CarAppHost \
++    $(if $(filter caramel_car_arm64 caramel_car_arm64_kokoro,$(TARGET_PRODUCT)),,CarAppHost) \
+ 
+ ifeq ($(HAS_SCALABLEUI),true)
+     $(call inherit-product, packages/services/Car/car_product/dewd/car_dewd_common.mk)

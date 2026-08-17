@@ -53,11 +53,3 @@ PRODUCT_BRAND := Caramel
 PRODUCT_MANUFACTURER := Radio Sound
 PRODUCT_MODEL := Caramel Vanilla arm64 Automotive emulator
 EMULATOR_VENDOR_NO_SOUND := true
-
-# Android 17's generic car product adds the AOSP CarAppHost from car_system.mk.
-# The Caramel prebuilt is the renderer we ship and must be the only templates
-# host OsmAnd can bind to; retaining both hosts makes CarAppActivity reject the
-# Automotive system as ambiguous.  Android 16 does not include CarAppHost in
-# its generic product, so this removal is intentionally Android 17-specific
-# and is kept at the end of the product fragment.
-PRODUCT_PACKAGES := $(filter-out CarAppHost,$(PRODUCT_PACKAGES))
