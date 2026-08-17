@@ -31,7 +31,7 @@ $(call inherit-product, vendor/radiosound/templates-host/caramel_vanilla_templat
 # CarAppActivity reject the Automotive system as ambiguous.  Android 16 does
 # not include CarAppHost in its generic product, so this removal is
 # intentionally Android 17-specific and must remain after the host fragment.
-PRODUCT_PACKAGES -= CarAppHost
+PRODUCT_PACKAGES := $(filter-out CarAppHost,$(PRODUCT_PACKAGES))
 
 $(call inherit-product, vendor/radiosound/aurora-store/caramel_vanilla_aurora_store.mk)
 $(call inherit-product, vendor/radiosound/caramelstore/caramel_store.mk)
