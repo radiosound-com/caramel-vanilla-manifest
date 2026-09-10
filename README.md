@@ -35,7 +35,7 @@ sudo apt-get update && sudo apt-get install \
 Install Google's `repo` tool and Git LFS first, then run:
 
 ```sh
-git clone https://github.com/radiosound-com/caramel-vanilla-manifest.git \
+git clone --branch android-17.0 https://github.com/radiosound-com/caramel-vanilla-manifest.git \
   && cd caramel-vanilla-manifest \
   && ./checkout.sh
 ```
@@ -47,13 +47,20 @@ different destination as the first argument to `checkout.sh`.
 
 ```sh
 cd ../caramel-vanilla-android-17
+sh ../caramel-vanilla-manifest/tools/android17/prepare-rpi5.sh .
 source build/envsetup.sh
-lunch aosp_rpi5_car-trunk_staging-userdebug
+lunch aosp_rpi5_car_4gb_nvme_waveshare-caramel-userdebug
 m bootimage systemimage vendorimage
 ./rpi5-mkimg.sh
 ```
 
-`rpi5-mkimg.sh` keeps the historical 15.3 GB default for compatibility. To
+The preparation step preserves physical-A/B OTA and templates-host fixes.
+It is also run by `checkout.sh`; rerun it after syncing an existing tree.
+See [Pi preparation details](tools/android17/rpi5/README.md).
+NVMe products default to PCIe Gen2 for WiFi compatibility, and ship one
+canonical firmware set under the generic/Pi5 vendor and ramdisk filenames.
+
+`rpi5-mkimg.sh` creates a 10 GiB sparse image by default. To
 make userdata consume the remaining space on a particular medium, pass its
 logical byte capacity explicitly; for example, a 250.06 GB disk reports
 `250059350016` bytes on macOS:
@@ -62,8 +69,8 @@ logical byte capacity explicitly; for example, a 250.06 GB disk reports
 RPI5_IMAGE_SIZE_BYTES=250059350016 ./rpi5-mkimg.sh
 ```
 
-The script creates a sparse image, retains the fixed boot/system/vendor/
-metadata layout, and formats the final userdata partition across all remaining
+The script creates a sparse image with boot A/B, system A/B, vendor A/B,
+misc, metadata, and userdata (partition 9), and formats userdata across remaining
 sectors. Verify the target disk capacity before writing a raw image.
 
 For a removable target, `scripts/flash-rpi5-image.sh` performs the safety
@@ -88,10 +95,11 @@ full expanded userdata partition:
   artifacts/rpi5-usb-nvme-waveshare-20260805-ed37e67.img.gz /dev/diskN
 ```
 
-It requires the existing 250-GB partition geometry, writes only boot/system/
-vendor, and preserves metadata/userdata by default. Add `--clean-userdata` to
+It requires the current nine-partition 250-GB geometry and a matching A/B image,
+writes both boot/system/vendor slots, and preserves misc/metadata/userdata by
+default. It rejects the older eight-partition layout. Add `--clean-userdata` to
 format those existing metadata and userdata partitions locally with `mke2fs`;
-this is still much faster than streaming the 229-GB userdata region from the
+this is still much faster than streaming the expanded userdata region from the
 image. Use the full-image flasher when repartitioning or establishing a truly
 fresh disk layout.
 

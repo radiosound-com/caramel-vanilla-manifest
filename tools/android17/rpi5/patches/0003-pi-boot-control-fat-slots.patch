@@ -1,0 +1,19 @@
+diff --git a/system/sepolicy/vendor/hal_bootctl_default.te b/system/sepolicy/vendor/hal_bootctl_default.te
+index f94cf5f..c8ddfcc 100644
+--- a/system/sepolicy/vendor/hal_bootctl_default.te
++++ b/system/sepolicy/vendor/hal_bootctl_default.te
+@@ -15,6 +15,14 @@ read_fstab(hal_bootctl_default)
+ allow hal_bootctl_default block_device:dir search;
+ allow hal_bootctl_default misc_block_device:blk_file rw_file_perms;
+ 
++# Needed to mount each FAT boot slot and update Raspberry Pi autoboot.txt.
++allow hal_bootctl_default self:capability sys_admin;
++allow hal_bootctl_default boot_block_device:blk_file r_file_perms;
++allow hal_bootctl_default tmpfs:dir { add_name create getattr open read search write mounton };
++allow hal_bootctl_default vfat:filesystem { mount unmount };
++allow hal_bootctl_default vfat:dir { add_name getattr open read search write };
++allow hal_bootctl_default vfat:file { create getattr open read setattr write };
++
+ # Needed for writing to kernel log
+ allow hal_bootctl_default kmsg_device:chr_file open;
+ allow hal_bootctl_default kmsg_device:chr_file write;

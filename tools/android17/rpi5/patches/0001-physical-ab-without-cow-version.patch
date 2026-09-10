@@ -1,0 +1,21 @@
+diff --git a/build/make/core/product_config.mk b/build/make/core/product_config.mk
+index 2bcc764..04d8d80 100644
+--- a/build/make/core/product_config.mk
++++ b/build/make/core/product_config.mk
+@@ -710,10 +710,12 @@ endif
+ endef
+ 
+ ifndef PRODUCT_VIRTUAL_AB_COW_VERSION
+-  PRODUCT_VIRTUAL_AB_COW_VERSION := 2
+-  ifdef PRODUCT_SHIPPING_API_LEVEL
+-    ifeq (true,$(call math_gt_or_eq,$(PRODUCT_SHIPPING_API_LEVEL),34))
+-      PRODUCT_VIRTUAL_AB_COW_VERSION := 3
++  ifeq (true,$(PRODUCT_VIRTUAL_AB_OTA))
++    PRODUCT_VIRTUAL_AB_COW_VERSION := 2
++    ifdef PRODUCT_SHIPPING_API_LEVEL
++      ifeq (true,$(call math_gt_or_eq,$(PRODUCT_SHIPPING_API_LEVEL),34))
++        PRODUCT_VIRTUAL_AB_COW_VERSION := 3
++      endif
+     endif
+   endif
+ endif

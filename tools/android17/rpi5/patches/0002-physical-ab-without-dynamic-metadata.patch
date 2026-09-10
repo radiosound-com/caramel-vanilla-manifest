@@ -1,0 +1,27 @@
+diff --git a/build/make/tools/releasetools/ota_from_target_files.py b/build/make/tools/releasetools/ota_from_target_files.py
+index add76ef..44ee946 100755
+--- a/build/make/tools/releasetools/ota_from_target_files.py
++++ b/build/make/tools/releasetools/ota_from_target_files.py
+@@ -581,6 +581,11 @@ def ModifyTargetFilesDynamicPartitionInfo(input_file, key, value):
+   if os.path.isdir(input_file):
+     dynamic_partition_info_path = os.path.join(
+         input_file, *DYNAMIC_PARTITION_INFO.split("/"))
++    # Physical-A/B targets do not have dynamic-partition metadata.  The
++    # no-UBLK compatibility path is also used for those targets, but there
++    # is nothing to annotate in that case.
++    if not os.path.exists(dynamic_partition_info_path):
++      return input_file
+     with open(dynamic_partition_info_path, "r") as fp:
+       dynamic_partition_info = fp.read()
+     dynamic_partition_info = ModifyKeyvalueList(
+@@ -589,6 +594,10 @@ def ModifyTargetFilesDynamicPartitionInfo(input_file, key, value):
+       fp.write(dynamic_partition_info)
+     return input_file
+ 
++  with zipfile.ZipFile(input_file, "r", allowZip64=True) as zfp:
++    if DYNAMIC_PARTITION_INFO not in zfp.namelist():
++      return input_file
++
+   target_file = common.MakeTempFile(prefix="targetfiles-", suffix=".zip")
+   shutil.copyfile(input_file, target_file)
+   common.ZipDelete(target_file, DYNAMIC_PARTITION_INFO)

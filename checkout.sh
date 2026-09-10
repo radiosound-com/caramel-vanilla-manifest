@@ -43,4 +43,7 @@ for lfs_project in \
   git -C "$lfs_project" lfs pull
 done
 
+# Preserve the tested physical-A/B and templates-host fixes on fresh checkouts.
+sh "$manifest_root/tools/android17/prepare-rpi5.sh" "$android_root"
+
 echo "Caramel Vanilla checkout ready at $android_root"

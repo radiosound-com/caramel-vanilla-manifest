@@ -36,20 +36,14 @@ grep -Fq 'PCM_IN, &in->pcm_config' "$caremu_audio_file"
 # ships a compatible renderer prebuilt, and AndroidX CarAppActivity refuses to
 # select between both hosts.  Keep the stock host for other products while
 # applying the narrow exclusion only to this Caramel AVD source tree.
-car_host_file=${source_root}/packages/services/Car/car_product/build/car_system.mk
-car_host_patch=${script_dir}/caramel-avd/patches/0002-disable-stock-car-app-host-for-caramel.patch
-if grep -Fq '    CarAppHost \' "$car_host_file"; then
-    git -C "$source_root" apply --check "$car_host_patch"
-    git -C "$source_root" apply "$car_host_patch"
-fi
-grep -Fq '$(if $(filter caramel_car_arm64 caramel_car_arm64_kokoro,$(TARGET_PRODUCT)),,CarAppHost)' "$car_host_file"
+sh "${script_dir}/prepare-caramel-host.sh" "$source_root"
 
 # Android's portable emulator-image makefile historically exposes emu_img_zip
 # only to sdk_* and gcar_* products. Keep the product's public name and add the
 # narrow Caramel prefix to that upstream packaging gate.
 emu_package_mk=${source_root}/device/generic/goldfish/build/tasks.workaround/emu_img_zip.mk
-if grep -Fq 'filter sdk_% gcar_%' "${emu_package_mk}"; then
-    sed -i 's/filter sdk_% gcar_%/filter sdk_% gcar_% caramel_%/' "${emu_package_mk}"
+if grep -Fq 'filter sdk_% gcar_%,' "${emu_package_mk}"; then
+    sed -i 's/filter sdk_% gcar_%,/filter sdk_% gcar_% caramel_%,/' "${emu_package_mk}"
 fi
 grep -Fq 'filter sdk_% gcar_% caramel_%' "${emu_package_mk}"
 
