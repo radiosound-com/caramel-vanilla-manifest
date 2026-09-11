@@ -22,6 +22,7 @@ files = {
     "build/make": ["core/product_config.mk", "tools/releasetools/ota_from_target_files.py"],
     "system/sepolicy": ["vendor/hal_bootctl_default.te"],
     "frameworks/base": ["core/java/android/app/AppOpsManager.java"],
+    "device/google/cuttlefish": ["guest/commands/vkms_controller/Android.bp", "tests/graphics/display/Android.bp"],
     "packages/services/Car": ["car_product/build/car.mk", "car_product/build/car_system.mk"],
     "device/brcm/rpi5": ["aosp_rpi5_car.mk"],
     "device/generic/car": ["sdk_car_arm64.mk", "AndroidProducts.mk", "emulator/audio/driver/audio_hw.c", "emulator/car_emulator_vendor.mk"],
@@ -73,9 +74,5 @@ for scenario in ("fresh", "legacy-avd", "conflict"):
             if generated.is_file():
                 relative = str(generated.relative_to(root))
                 expected = (args.android / relative).read_bytes()
-                # Do not publish this exact build-local fake ownership stub.
-                stub = b'\n// Build-local ownership metadata for an unused Cuttlefish VKMS module.\nteam {\n    name: "trendy_team_desktop_display",\n    trendy_team_id: "0",\n}\n'
-                if relative == "device/generic/car/caramel-avd/Android.bp" and expected.endswith(stub):
-                    expected = expected[:-len(stub)]
                 assert generated.read_bytes() == expected, relative
         print(f"PASS: {scenario} preparation matches current Android checkout and is idempotent")

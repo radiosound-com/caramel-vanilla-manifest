@@ -1,0 +1,22 @@
+diff --git a/device/google/cuttlefish/guest/commands/vkms_controller/Android.bp b/device/google/cuttlefish/guest/commands/vkms_controller/Android.bp
+--- a/device/google/cuttlefish/guest/commands/vkms_controller/Android.bp
++++ b/device/google/cuttlefish/guest/commands/vkms_controller/Android.bp
+@@ -14,7 +14,6 @@
+ 
+ package {
+     default_applicable_licenses: ["Android-Apache-2.0"],
+-    default_team: "trendy_team_desktop_display",
+ }
+ 
+ cc_binary {
+diff --git a/device/google/cuttlefish/tests/graphics/display/Android.bp b/device/google/cuttlefish/tests/graphics/display/Android.bp
+--- a/device/google/cuttlefish/tests/graphics/display/Android.bp
++++ b/device/google/cuttlefish/tests/graphics/display/Android.bp
+@@ -48,7 +48,6 @@
+ 
+ java_test_host {
+     name: "CfVkmsCursorTest",
+-    team: "trendy_team_desktop_display",
+     defaults: [
+         "cuttlefish_host_test_utils_defaults",
+     ],

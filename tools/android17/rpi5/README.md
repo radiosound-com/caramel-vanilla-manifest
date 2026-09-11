@@ -13,6 +13,9 @@ requiring new forks of upstream AOSP projects:
 - Exclude stock CarAppHost for Caramel AVDs and products setting
   `CARAMEL_VANILLA_EXCLUDE_CAR_APP_HOST=true`, retaining it elsewhere.
 - Preserve Android 16's background-media audio-focus default.
+- Omit two optional Cuttlefish ownership annotations referring to a team not
+  defined in this source snapshot. No fake team definition is needed; runtime
+  code, licenses and the display tests' existing package-level team are intact.
 
 The Android 16 Bluetooth PAN/no-telephony workaround is intentionally not
 applied: retain Android 17's existing Bluetooth/network implementation.
@@ -28,6 +31,7 @@ Gen3 reproduced association failures with the same firmware and credential.
 The physical mechanism is not established, and results need not generalize
 to every Pi/adapter. Country and WiFi credentials remain device-local.
 
-Validation of source preparation is not a full release build. The latest
-ramdisk build attempt was blocked by unrelated missing SDV telemetry Python
-dependencies. Resolve those before publishing a new full image or OTA.
+The Pi product excludes SDV/display-safety tests alongside the services omitted
+by the manifest, using PRODUCT_SOURCE_ROOT_DIRS. Normal dependency checking
+remains enabled. Validate preparation with `test-source-preparation.py`, then
+run a complete target-files/OTA build and hardware acceptance before release.
