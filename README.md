@@ -222,8 +222,7 @@ reboot. The current verified archive is published in the
 with SHA-256
 `2b2d2fe39db75111c0edc8eb49ffebb1797411d5fa5acc3eeed8c986573dc5ec`.
 
-This v6 archive was built on the littleboy Linux AOSP host from the synced
-Caramel Android 16 checkout, including voice commit `667dee0` and the split
+This v6 archive includes voice commit `667dee0` and the split
 OsmAnd/templates-host packaging fix. It was booted from clean userdata on
 Apple Silicon with the Automotive profile and host-audio support, then
 verified through reboot, Zipformer recognition, offline eSpeak TTS, generic
