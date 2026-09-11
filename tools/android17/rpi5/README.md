@@ -12,6 +12,10 @@ requiring new forks of upstream AOSP projects:
 - Allow the boot-control HAL to mount the Pi FAT slots and update autoboot.
 - Exclude stock CarAppHost for Caramel AVDs and products setting
   `CARAMEL_VANILLA_EXCLUDE_CAR_APP_HOST=true`, retaining it elsewhere.
+- Preserve Android 16's background-media audio-focus default.
+
+The Android 16 Bluetooth PAN/no-telephony workaround is intentionally not
+applied: retain Android 17's existing Bluetooth/network implementation.
 
 The device repository supplies the Gen2 NVMe default and one canonical .265
 WiFi firmware set for vendor/early-ramdisk filenames. Firmware experiments

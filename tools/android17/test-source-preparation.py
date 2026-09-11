@@ -21,6 +21,7 @@ manifest = Path(__file__).resolve().parents[2]
 files = {
     "build/make": ["core/product_config.mk", "tools/releasetools/ota_from_target_files.py"],
     "system/sepolicy": ["vendor/hal_bootctl_default.te"],
+    "frameworks/base": ["core/java/android/app/AppOpsManager.java"],
     "packages/services/Car": ["car_product/build/car.mk", "car_product/build/car_system.mk"],
     "device/brcm/rpi5": ["aosp_rpi5_car.mk"],
     "device/generic/car": ["sdk_car_arm64.mk", "AndroidProducts.mk", "emulator/audio/driver/audio_hw.c", "emulator/car_emulator_vendor.mk"],

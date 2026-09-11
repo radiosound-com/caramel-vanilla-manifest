@@ -1,0 +1,14 @@
+diff --git a/frameworks/base/core/java/android/app/AppOpsManager.java b/frameworks/base/core/java/android/app/AppOpsManager.java
+--- a/frameworks/base/core/java/android/app/AppOpsManager.java
++++ b/frameworks/base/core/java/android/app/AppOpsManager.java
+@@ -3182,7 +3182,9 @@
+             .setDefaultMode(AppOpsManager.MODE_ALLOWED)
+             .build(),
+         new AppOpInfo.Builder(OP_TAKE_AUDIO_FOCUS, OPSTR_TAKE_AUDIO_FOCUS, "TAKE_AUDIO_FOCUS")
+-            .setDefaultMode(AppOpsManager.MODE_FOREGROUND).build(),
++            // Preserve Caramel's background media focus behavior from Android 16.
++            // Normal audio-focus arbitration still selects the audible player.
++            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+         new AppOpInfo.Builder(OP_AUDIO_MASTER_VOLUME, OPSTR_AUDIO_MASTER_VOLUME,
+                 "AUDIO_MASTER_VOLUME").setSwitchCode(OP_AUDIO_MASTER_VOLUME)
+             .setRestriction(UserManager.DISALLOW_ADJUST_VOLUME)
