@@ -22,6 +22,7 @@ files = {
     "build/make": ["core/product_config.mk", "tools/releasetools/ota_from_target_files.py"],
     "system/sepolicy": ["vendor/hal_bootctl_default.te"],
     "frameworks/base": ["core/java/android/app/AppOpsManager.java"],
+    "packages/apps/Car/Launcher": ["docklib/src/com/android/car/docklib/DockViewController.kt"],
     "device/google/cuttlefish": ["guest/commands/vkms_controller/Android.bp", "tests/graphics/display/Android.bp"],
     "packages/services/Car": ["car_product/build/car.mk", "car_product/build/car_system.mk"],
     "device/brcm/rpi5": ["aosp_rpi5_car.mk"],

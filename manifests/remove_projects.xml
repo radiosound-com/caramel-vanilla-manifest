@@ -39,6 +39,8 @@
   <remove-project name="platform/system/software_defined_vehicle/service_bundles_registry" />
   <remove-project name="platform/system/software_defined_vehicle/telemetry" />
   <remove-project name="platform/system/software_defined_vehicle/update_manager" />
+  <!-- This service requires the omitted SDV telemetry stack. -->
+  <remove-project name="platform/packages/services/display_safety" />
   <!-- These test/tooling snapshots are outside the Raspberry Pi product build. -->
   <remove-project name="platform/tools/loganalysis" />
 </manifest>

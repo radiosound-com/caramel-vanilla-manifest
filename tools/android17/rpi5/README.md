@@ -13,6 +13,8 @@ requiring new forks of upstream AOSP projects:
 - Exclude stock CarAppHost for Caramel AVDs and products setting
   `CARAMEL_VANILLA_EXCLUDE_CAR_APP_HOST=true`, retaining it elsewhere.
 - Preserve Android 16's background-media audio-focus default.
+- Preserve Android 16's focused/full-screen dock guard so reselecting an open
+  car app does not restart its wrapper. Media-app launches remain unchanged.
 - Omit two optional Cuttlefish ownership annotations referring to a team not
   defined in this source snapshot. No fake team definition is needed; runtime
   code, licenses and the display tests' existing package-level team are intact.
@@ -35,3 +37,12 @@ The Pi product excludes SDV/display-safety tests alongside the services omitted
 by the manifest, using PRODUCT_SOURCE_ROOT_DIRS. Normal dependency checking
 remains enabled. Validate preparation with `test-source-preparation.py`, then
 run a complete target-files/OTA build and hardware acceptance before release.
+
+The dock predicate has a small compiled regression test (run on Linux after
+preparation, using the Android tree's Kotlin compiler):
+
+```sh
+python3 tools/android17/test-dock-guard.py \
+  /path/to/android/packages/apps/Car/Launcher/docklib/src/com/android/car/docklib/DockViewController.kt \
+  /path/to/android/external/kotlinc/bin/kotlinc
+```

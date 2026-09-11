@@ -1,0 +1,31 @@
+diff --git a/packages/apps/Car/Launcher/docklib/src/com/android/car/docklib/DockViewController.kt b/packages/apps/Car/Launcher/docklib/src/com/android/car/docklib/DockViewController.kt
+--- a/packages/apps/Car/Launcher/docklib/src/com/android/car/docklib/DockViewController.kt
++++ b/packages/apps/Car/Launcher/docklib/src/com/android/car/docklib/DockViewController.kt
+@@ -213,6 +213,13 @@ open class DockViewController(
+             dockViewModel.addDynamicItem(componentName)
+ 
+     override fun launchApp(componentName: ComponentName, isMediaApp: Boolean) {
++        // Returning to an already-focused full-screen car app must not restart
++        // its wrapper and briefly replace the current surface with black.
++        // Preserve the Android 16 behavior; media apps still use MediaUtils.
++        if (!isMediaApp && isFocusedFullScreenTask(componentName.packageName)) {
++            return
++        }
++
+         val intent = if (isMediaApp) {
+             MediaUtils.createLaunchIntent(componentName)
+         } else {
+@@ -227,6 +234,13 @@ open class DockViewController(
+         userContext.startActivityAsUser(intent, options.toBundle(), userContext.user)
+     }
+ 
++    private fun isFocusedFullScreenTask(packageName: String): Boolean {
++        return dockViewModel.getRunningTasks().any { task ->
++            task.isFocused && task.windowingMode == 1 &&
++                    task.topActivity?.packageName == packageName
++        }
++    }
++
+     override fun getIconColorWithScrim(componentName: ComponentName) =
+             dockViewModel.getIconColorWithScrim(componentName)
+ 
