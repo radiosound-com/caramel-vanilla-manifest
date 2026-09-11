@@ -50,7 +50,7 @@ cd ../caramel-vanilla-android-17
 sh ../caramel-vanilla-manifest/tools/android17/prepare-rpi5.sh .
 source build/envsetup.sh
 lunch aosp_rpi5_car_4gb_nvme_waveshare-caramel-userdebug
-m bootimage systemimage vendorimage
+m target-files-package otapackage
 ./rpi5-mkimg.sh
 ```
 
@@ -72,6 +72,14 @@ RPI5_IMAGE_SIZE_BYTES=250059350016 ./rpi5-mkimg.sh
 The script creates a sparse image with boot A/B, system A/B, vendor A/B,
 misc, metadata, and userdata (partition 9), and formats userdata across remaining
 sectors. Verify the target disk capacity before writing a raw image.
+
+After flashing the default 10 GiB image, attach the drive to Linux with all its
+partitions unmounted and run `sudo scripts/expand-rpi5-userdata.sh /dev/sdX`
+using its verified whole-disk path (NVMe names such as `/dev/nvme1n1` also work).
+This helper accepts only the current nine-partition layout, preserves the
+userdata start/PARTUUID, saves a GPT recovery backup, checks ext4, and expands
+partition 9 and its filesystem without formatting. It rejects older layouts.
+Back up personal data before any partition operation.
 
 For a removable target, `scripts/flash-rpi5-image.sh` performs the safety
 checks and authenticates `sudo` once before streaming a compressed image. It
@@ -156,8 +164,6 @@ that target before rebuilding `systemimage`, `vendorimage`, and `emu_img_zip`;
 an incremental package can otherwise preserve a stale APK. The x86_64 product
 can be selected instead with `lunch sdk_car_x86_64-trunk_staging-userdebug`.
 
-### Caramel Vanilla Android 16 arm64 Automotive AVD
-
 ### Caramel Vanilla Android 17 arm64 Automotive AVD
 
 The Android 17 checkout uses the same portable Automotive image boundary as
@@ -175,10 +181,12 @@ The output is
 `out/target/product/emulator_car64_arm64/sdk-repo-linux-system-images.zip`.
 Extract it on the Mac and launch it with the same Automotive hardware profile
 used for Android 16, passing the extracted `arm64-v8a` directory as `-sysdir`
-and its `kernel-ranchu` as `-kernel`. Validate API 36/Baklava, the
+and its `kernel-ranchu` as `-kernel`. Validate Android 17/API 37, the
 `caramel_car_arm64` product, `sys.boot_completed`, CarService, the assistant,
 templates-host, OsmAnd, and offline eSpeak TTS before comparing it with the
 Android 16 v6 image.
+
+### Android 16 AVD reference and prior validation
 
 The manifest has a dedicated AVD product for testing the same Caramel voice,
 OsmAnd, templates-host, and store packaging without Raspberry Pi hardware. It
