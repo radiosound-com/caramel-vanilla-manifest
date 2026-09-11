@@ -55,7 +55,7 @@ python3 tools/fdroid-scanner/refresh_metadata.py \
   --bearer-token-file /etc/caramel-store/import-token
 ```
 
-Run this on `littleboy`, beside the existing scanner. The provided systemd
+Run this beside the existing scanner. The provided systemd
 units schedule it daily with a randomized delay and use the same scanner lock,
 cache, signing key, and scoped import credential:
 
@@ -68,7 +68,7 @@ systemctl list-timers caramel-store-metadata-refresh.timer
 ```
 
 The unit files contain paths and endpoint names only. Keep the signing key and
-import token out of the repository and provision them on `littleboy` through
+import token out of the repository and provision them on the scanner host through
 the existing secret-management process.
 
 The selection file is one package ID per line. Comments beginning with `#`
